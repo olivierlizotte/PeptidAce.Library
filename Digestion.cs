@@ -33,6 +33,12 @@ namespace PeptidAce
 
         private bool IsDone = true;
         private System.Collections.Concurrent.ConcurrentQueue<Tuple<Peptide, int>> CumulMatch;
+        /// <summary>
+        /// Runs the protein digestion on the GPU. Does not support modifications for now.
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="Proteins"></param>
+        /// <param name="listOfQueries"></param>
         private void RunGPUProteinDigest(DBOptions options, List<Protein> Proteins, Queries listOfQueries)
         {
             List<double> precursorMasses = new List<double>(listOfQueries.Count);

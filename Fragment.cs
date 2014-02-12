@@ -56,7 +56,7 @@ namespace PeptidAce
             addOn = addedMass;
         }
     }
-
+    /*
     public class FragmentLoss : FragmentClass//Modification, IFragment
     {
         public override string Name { get { return "loss"; } }
@@ -90,8 +90,7 @@ namespace PeptidAce
         public override string Name { get { return "b"; } }
         override public IEnumerable<double> ComputeFragment(double cTermCumul, double nTermCumul)
         {
-            //yield return nTermCumul/* + 0;//*/ - 1.007276;//-H
-            yield return nTermCumul;//*/ - 1.007276;//-H
+            yield return nTermCumul;
         }
         override public bool IsReverse { get { return false; } }
         public override double Distribution
@@ -105,8 +104,7 @@ namespace PeptidAce
         public override string Name { get { return "c"; } }
         override public IEnumerable<double> ComputeFragment(double cTermCumul, double nTermCumul)
         {
-            //yield return nTermCumul/* + 17.02654915;//*/ +16.018724;//+NH2
-            yield return nTermCumul + 17.02654915;//*/ +16.018724;//+NH2
+            yield return nTermCumul + 17.02654915;
         }
         override public bool IsReverse { get { return false; } }
         public override double Distribution
@@ -136,8 +134,7 @@ namespace PeptidAce
         public override string Name { get { return "y"; } }
         override public IEnumerable<double> ComputeFragment(double cTermCumul, double nTermCumul)
         {
-            //yield return cTermCumul/* + 18.0105646942;//*/ + 1.007276;//+H
-            yield return cTermCumul + Constants.WATER_MONOISOTOPIC_MASS;//*/ + 1.007276;//+H
+            yield return cTermCumul + Constants.WATER_MONOISOTOPIC_MASS;
         }
         override public bool IsReverse { get { return true; } }
         public override double Distribution
@@ -151,15 +148,14 @@ namespace PeptidAce
         public override string Name { get { return "z"; } }
         override public IEnumerable<double> ComputeFragment(double cTermCumul, double nTermCumul)
         {
-            //yield return cTermCumul/* + 1.991840552567;//*/ -16.018724;//-NH2
-            yield return cTermCumul + 1.991840552567;// -Constants.PROTON_MASS;//*/ -16.018724;//-NH2
+            yield return cTermCumul + 1.991840552567;// -Constants.PROTON_MASS;
         }
         override public bool IsReverse { get { return true; } }
         public override double Distribution
         {
             get { return 1; }
         }
-    }
+    }//*/
 
     public class FullFragments
     {

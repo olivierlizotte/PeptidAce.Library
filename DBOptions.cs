@@ -37,7 +37,7 @@ namespace PeptidAce
         public int MaximumPeptideLength = 100;
 
         public FullFragments fullFragment = new FullFragments();
-        public Fragments fragments;
+        //public Fragments fragments;
         public int NbMinProducts = 4;
 
         public bool addFragmentLoss = false;
@@ -81,7 +81,7 @@ namespace PeptidAce
         {
             fixedModifications = new List<Modification>();
             variableModifications = new List<Modification>();
-            fragments = new Fragments();
+            //fragments = new Fragments();
             if (console == null)
                 ConSole = new ConSolCommandLine();
             else

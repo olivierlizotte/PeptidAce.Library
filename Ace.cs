@@ -169,7 +169,7 @@ namespace PeptidAce
         }
 
         /// <summary>
-        /// 
+        /// Launches ProPheus to match queries to peptide sequences
         /// </summary>
         /// <param name="queries"></param>
         /// <returns></returns>

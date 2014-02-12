@@ -140,11 +140,11 @@ namespace PeptidAce
             dbOptions.ConSole.WriteLine("  ---  Number of proteins            : " + target + " targets [" + proteins.Count + "]" + "  ---  ");
             if (!light)
             {
-                WriteFragmentation(true);
-                WriteFragmentation(false);
+                //WriteFragmentation(true);
+                //WriteFragmentation(false);
             }
         }
-
+        /*
         public void WriteFragmentation(bool target)
         {
             vsCSVWriter writer = new vsCSVWriter(dbOptions.OutputFolder + "FragmentStats_" + (target ? "Targets" : "Decoy") + ".csv");
@@ -220,8 +220,8 @@ namespace PeptidAce
                 writer.AddLine("    " + fragment + ", Number of fragments = ," + nbFrag + ",   Intensity = ," + cumulIntensity);
             }
             writer.WriteToFile();
-        }
-
+        }//*/
+        /*
         public void ExportFragments(PeptideSpectrumMatch psm)
         {
             vsCSVWriter writer = new vsCSVWriter(dbOptions.OutputFolder + psm.Peptide.Sequence + "_" + vsCSV.GetFileName_NoExtension(psm.Query.sample.sSDF) + "_" + psm.Query.precursor.Track.RT + ".csv");
@@ -434,8 +434,8 @@ namespace PeptidAce
                 writer.AddLine(line);
             }
             writer.WriteToFile();
-        }
-        
+        }//*/
+        /*
         public void ExportFragmentIntensities(List<PeptideSpectrumMatch> psms, Peptide peptide, int psmCharge, string fileName)
         {
             vsCSVWriter writer = new vsCSVWriter(fileName);
@@ -496,7 +496,8 @@ namespace PeptidAce
             }
             writer.WriteToFile();
         }
-
+        //*/
+        /*
         public void ExportFragmentIntensitiesForAllPSM(List<PeptideSpectrumMatch> psms, Peptide peptide, int psmCharge, string fileName)
         {
             vsCSVWriter writer = new vsCSVWriter(fileName);
@@ -527,7 +528,7 @@ namespace PeptidAce
                 writer.AddLine(line);
             }
             writer.WriteToFile();
-        }
+        }//*/
 
         public void Export(double fdr, string keyword = "", bool onlyPrecursors = false)
         {
