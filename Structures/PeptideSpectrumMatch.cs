@@ -34,6 +34,7 @@ namespace PeptidAce
         public double MatchingProductsFraction { get; set; }
 
         public double MatchingIntensity { get; set; }
+        public double MatchingNormalizedIntensity { get; set; }
 
         public double MatchingIntensityFraction { get; set; }
 
@@ -76,6 +77,9 @@ namespace PeptidAce
         //TODO Check if those var are common with Precursor and remove zeroed out var
         public double ProbabilityScore()
         {
+            return MatchingNormalizedIntensity;
+            //return MatchingProducts + FragmentScore;// *PrecursorScore;
+            /*
             DBOptions options = Query.options;
             //double score = FragmentScore() * PrecursorScore;// +ProductScore;
             double score = options.dIntensity * MatchingIntensity +
@@ -86,9 +90,9 @@ namespace PeptidAce
                                 options.dMatchingProduct * MatchingWeightedProducts +
                                 options.dProtein * ProteinScore +
                                 options.dPeptideScore * PeptideScore +
-                                options.dFragmentScore * FragmentScore;//*/
+                                options.dFragmentScore * FragmentScore;
             //double score = FragmentScore;
-            return score;
+            return score;//*/
         }
 
         public bool Decoy
@@ -204,6 +208,7 @@ namespace PeptidAce
             //TotalProducts = theoretical_product_mz.Count;
             MatchingProducts    = 0;
             MatchingIntensity   = 0.0;
+            MatchingNormalizedIntensity = 0.0;
             double cumulDiff    = 0;
             ProductScore        = 0;
             List<ProductMatch> cumulMatch = new List<ProductMatch>();
@@ -213,6 +218,7 @@ namespace PeptidAce
                 MatchingProducts++;
                 MatchingWeightedProducts  += match.weight;
                 MatchingIntensity += match.obsIntensity;
+                MatchingNormalizedIntensity += match.normalizedIntensity;
                 cumulDiff += Math.Abs(match.mass_diff) * match.weight;
                 
                 cumulMatch.Add( match );

@@ -151,6 +151,15 @@ namespace PeptidAce
                     AllSpectras.Add(sample, spectra);
                 }           
             }
+            List<Sample> keys = new List<Sample>(AllSpectras.Keys);
+            foreach (Sample s in keys)
+            {
+                Spectra toKeep = new Spectra();
+                foreach (ProductSpectrum ps in AllSpectras[s])
+                    if (ps.PrecursorIntensity > 0)
+                        toKeep.Add(ps);
+                AllSpectras[s] = toKeep;
+            }
             return AllSpectras;            
         }
         

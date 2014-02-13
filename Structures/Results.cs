@@ -551,7 +551,7 @@ namespace PeptidAce
                 prec = Optimizer.PrecursorOptimizer(matchedPrecursors, fdr);
                 Sol.CONSOLE.OutputLine(">   " + prec.Count + " Optimized Precursors");
                 MSSearcher.Export(dbOptions.outputFolder + keyword + "Optimized_precursors.csv", prec);//*/
-
+                //dbOptions.ConSole.WriteLine("Target Precursors : " )
                 prec = matchedPrecursors.ComputeAtFDR(fdr);
                 dbOptions.ConSole.WriteLine(">   " + prec.Count + " Uptimized V5 Precursors");
                 MSSearcher.Export(dbOptions.OutputFolder + keyword + "UptimizedV5_precursors.csv", prec);

@@ -160,15 +160,20 @@ namespace PeptidAce
     public class FullFragments
     {
         List<FragmentGen> fragments;
-        public FullFragments(bool includeLosses = false)
+        public FullFragments(bool bNyOnly = false, bool includeLosses = false)
         {
             List<FragmentGen> mainFrags = new List<FragmentGen>();
-            mainFrags.Add(new FragmentGen("A", false, -29.002741 + Constants.PROTON_MASS));
+            
             mainFrags.Add(new FragmentGen("B", false, 0));
-            mainFrags.Add(new FragmentGen("C", false, 17.02654915));
             mainFrags.Add(new FragmentGen("X", true, 43.9898346942));
-            mainFrags.Add(new FragmentGen("Y", true, Constants.WATER_MONOISOTOPIC_MASS));
-            mainFrags.Add(new FragmentGen("Z", true, 1.991840552567));
+
+            if (!bNyOnly)
+            {
+                mainFrags.Add(new FragmentGen("A", false, -29.002741 + Constants.PROTON_MASS));
+                mainFrags.Add(new FragmentGen("C", false, 17.02654915));
+                mainFrags.Add(new FragmentGen("Y", true, Constants.WATER_MONOISOTOPIC_MASS));
+                mainFrags.Add(new FragmentGen("Z", true, 1.991840552567));
+            }
 
             fragments = new List<FragmentGen>();
             foreach (FragmentGen fg in mainFrags)

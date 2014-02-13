@@ -36,7 +36,7 @@ namespace PeptidAce
         public int MinimumPeptideLength = 5;
         public int MaximumPeptideLength = 100;
 
-        public FullFragments fullFragment = new FullFragments();
+        public FullFragments fullFragment = new FullFragments(false);
         //public Fragments fragments;
         public int NbMinProducts = 4;
 
