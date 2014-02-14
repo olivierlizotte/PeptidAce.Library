@@ -124,11 +124,10 @@ namespace PeptidAce
                 Sample sample = Project[i];
                 string trackFile = vsCSV.GetFolder(sample.sSDF) + vsCSV.GetFileName_NoExtension(sample.sSDF) + "_Tracks.csv";
                 string msmsIonFile = vsCSV.GetFolder(sample.sSDF) + vsCSV.GetFileName_NoExtension(sample.sSDF) + "_MSMSIons.csv";
-                if(dbOptions.LoadSpectraIfFound && System.IO.File.Exists(trackFile)
-                                                && System.IO.File.Exists(msmsIonFile))
+				if(dbOptions.LoadSpectraIfFound && System.IO.File.Exists(msmsIonFile))
                 {
                     dbOptions.ConSole.WriteLine("Loading Sectra from " + trackFile + " AND " + msmsIonFile);                    
-                    if(loadMS)
+					if(loadMS && System.IO.File.Exists(trackFile))
                         AllSpectras.Add(sample, Spectra.Import(msmsIonFile, trackFile, dbOptions));
                     else
                         AllSpectras.Add(sample, Spectra.Import(msmsIonFile, null, dbOptions));

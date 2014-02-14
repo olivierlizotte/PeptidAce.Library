@@ -19,6 +19,7 @@ namespace PeptidAce
         public Sample                       sample;
         //public Dictionary<string, PeptideSpectrumMatch>       psms;
         public PeptideSpectrumMatches       psms;
+		public List<PSM> psmsFast = new List<PSM>();
         public ProductSpectrum              spectrum;
         public Precursor                    precursor;
         public int                          spectrumIndex;

@@ -61,34 +61,59 @@ namespace PeptidAce
         public static Spectra Import(string filenameMSMS, string filenameTracks, DBOptions dbOptions)
         {
             Spectra spectra = new Spectra();
-            vsCSV csv = new vsCSV(filenameMSMS);
-            if (csv.LINES_LIST.Count == 0 || csv.LINES_LIST[0].CompareTo(ProductSpectrum.TITLE) != 0)
-                return null;
-            for (int i = 1; i < csv.LINES_LIST.Count; i++)
-            {
-                string[] splits = csv.LINES_LIST[i].Split(vsCSV._Generic_Separator);
-                double mz = double.Parse(splits[3]);
-                int charge = int.Parse(splits[5]);
-                int nbPeaks = int.Parse(splits[9]);
-                List<MsMsPeak> peaks = new List<MsMsPeak>(nbPeaks);
-                i++;
-                for(int j = 0; j < nbPeaks; i++,j++)
-                {
-                    try
-                    {
-                        string[] splitPeaks = csv.LINES_LIST[i].Split('\t');
-                        if (splitPeaks.Length > 2)
-                            peaks.Add(new MsMsPeak(double.Parse(splitPeaks[0]), double.Parse(splitPeaks[1]), int.Parse(splitPeaks[2])));
-                        else
-                            peaks.Add(new MsMsPeak(double.Parse(splitPeaks[0]), double.Parse(splitPeaks[1]), 0));
-                    }
-                    catch (Exception)
-                    {
-                        dbOptions.ConSole.WriteLine("Error parsing line : " + csv.LINES_LIST[i]);
-                    }
-                }
-                spectra.AddMSMS(new ProductSpectrum(int.Parse(splits[0]), double.Parse(splits[1]), splits[2], mz, double.Parse(splits[4]), charge, Utilities.Numerics.MassFromMZ(mz, charge), peaks, double.Parse(splits[8]), double.Parse(splits[10]), double.Parse(splits[11])));
-            }
+			try
+			{
+				System.IO.FileStream fs;
+				try
+				{
+					fs = new System.IO.FileStream(filenameMSMS, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
+				}
+				catch (System.Exception)
+				{
+					fs = new System.IO.FileStream(filenameMSMS, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite);
+				}
+				using (System.IO.StreamReader sr = new System.IO.StreamReader(fs))
+				{
+					string line = sr.ReadLine();
+
+					while ((line = sr.ReadLine()) != null)
+					{
+						string[] splits = line.Split(vsCSV._Generic_Separator);
+						double mz = double.Parse(splits[3]);
+						int charge = int.Parse(splits[5]);
+						int nbPeaks = int.Parse(splits[9]);
+						List<MsMsPeak> peaks = new List<MsMsPeak>(nbPeaks);
+
+						line = sr.ReadLine();
+						for(int j = 0; j < nbPeaks && line != null; j++)
+						{
+							try
+							{
+								string[] splitPeaks = line.Split('\t');
+								if (splitPeaks.Length > 2)
+									peaks.Add(new MsMsPeak(double.Parse(splitPeaks[0]), double.Parse(splitPeaks[1]), int.Parse(splitPeaks[2])));
+								else
+									peaks.Add(new MsMsPeak(double.Parse(splitPeaks[0]), double.Parse(splitPeaks[1]), 0));
+							}
+							catch (Exception)
+							{
+								dbOptions.ConSole.WriteLine("Error parsing line : " + line);
+							}
+
+							line = sr.ReadLine();
+						}
+						spectra.AddMSMS(new ProductSpectrum(int.Parse(splits[0]), double.Parse(splits[1]), splits[2], mz, double.Parse(splits[4]), charge, Utilities.Numerics.MassFromMZ(mz, charge), peaks, double.Parse(splits[8]), double.Parse(splits[10]), double.Parse(splits[11])));					
+					}
+				}
+				fs.Close();
+			}
+			catch (System.Exception ex)
+			{
+				//Well, the file didn't open.... what to do...?
+				Console.WriteLine("Could not open file :" + ex.Message);
+				//strLines = null;
+			}
+
             if(!string.IsNullOrEmpty(filenameTracks))
                 spectra.tracks = Tracks.Import(filenameTracks, dbOptions);
             return spectra;

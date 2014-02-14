@@ -22,7 +22,34 @@ namespace PeptidAce
         public ProPheus(DBOptions options)
         {
             this.options = options;
-        }
+		}
+
+		/// <summary>
+		/// Creates a PSM, which computes the score. Only top scorers are saved
+		/// </summary>
+		/// <param name="query"></param>
+		/// <param name="modified_peptide"></param>
+		private void ComputePSMFast(Query query, PeptideHit hit)
+		{
+			PSM psm = new PSM (hit, query);
+			if (psm.MatchingProducts >= options.NbMinProducts)
+			{
+				if (query.psmsFast.Count < options.NbPSMToKeep)
+					query.psmsFast.Add(psm);
+				else if (query.psmsFast[options.NbPSMToKeep-1].MatchingProducts < psm.MatchingProducts)
+				{
+					for (int i = 0; i < query.psms.Count; i++)
+						if (query.psmsFast[i].MatchingProducts <= psm.MatchingProducts)
+						{
+							query.psmsFast.Insert(i, psm);
+							break;
+						}
+					if (query.psmsFast.Count > options.NbPSMToKeep)
+						query.psmsFast.RemoveAt(options.NbPSMToKeep-1);
+				}
+			}
+		}
+
 
         /// <summary>
         /// Creates a PSM, which computes the score. Only top scorers are saved
@@ -51,6 +78,37 @@ namespace PeptidAce
             }
         }
 
+		public Precursors SearchFast(Queries queries, List<Protein> proteins)
+		{
+			queries.dbOptions.ConSole.WriteLine("Mapping " + queries.Count + " queries to the digested proteome ... ");
+
+			long nbQueryConsidered = 0;
+			Digestion dg = new Digestion (options);
+			foreach (PeptideHit hit in dg.DigestFast(proteins, queries, options)) {
+				int indexPrecursor = hit.firstIndex;
+				double maximumMass = MassTolerance.MzTop (hit.mass, options.precursorMassTolerance);
+				double minimumMass = MassTolerance.MzFloor (hit.mass, options.precursorMassTolerance);
+
+				if (indexPrecursor < queries.Count && queries [indexPrecursor].precursor.Mass >= minimumMass) {
+					while (indexPrecursor < queries.Count && queries [indexPrecursor].precursor.Mass <= maximumMass) {
+
+						//Target (or decoy with enzyme digests)
+						Peptide peptide = new Peptide ();
+						ComputePSMFast (queries [indexPrecursor], hit);
+
+						indexPrecursor++;
+
+					}
+
+					nbQueryConsidered += indexPrecursor - hit.firstIndex;
+				} else
+					options.ConSole.WriteLine ("WTF####");
+			}
+			options.ConSole.WriteLine(nbQueryConsidered + " queries considered");
+
+			return queries.Precursors;
+		}
+
         /// <summary>
         /// Maps all peptide sequences to potential precursors and spectrum
         /// </summary>
@@ -63,7 +121,7 @@ namespace PeptidAce
             queries.dbOptions.ConSole.WriteLine("Mapping " + queries.Count + " queries to the digested proteome ... ");
 
             long nbQueryConsidered = 0;
-            Parallel.ForEach<Tuple<Peptide, int>>(fittingPeptides, (Tuple<Peptide, int> hit) =>            
+			Parallel.ForEach<Tuple<Peptide, int>>(fittingPeptides, (Tuple<Peptide, int> hit) =>            
             {
                 int indexPrecursor = hit.Item2;
                 double maximumMass = MassTolerance.MzTop(hit.Item1.MonoisotopicMass, options.precursorMassTolerance);

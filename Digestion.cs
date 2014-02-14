@@ -96,37 +96,95 @@ namespace PeptidAce
             }
         }
 
-        public IEnumerable<Tuple<Peptide, int>> DigestProteomeOnTheFly(List<Protein> proteins, bool allowSNP, Queries AllQueries)
+		public List<List<double>> GetProteinMasses(Protein protein, DBOptions options)
+		{
+			List<List<double>> masses = new List<List<double>> (protein.BaseSequence.Length);
+			foreach(char aa in protein.BaseSequence)
+			{
+				double mass = AminoAcidMasses.GetMonoisotopicMass(aa);
+				List<double> mods = new List<double> ();
+				foreach (Modification mod in options.fixedModifications)
+					if (mod.AminoAcid == aa)
+						mods.Add (mass + mod.MonoisotopicMassShift);
+				if(mods.Count == 0)
+					mods.Add(mass);
+				foreach (Modification mod in options.variableModifications)
+					if (mod.AminoAcid == aa)
+						mods.Add (mass + mod.MonoisotopicMassShift);
+				masses.Add (mods);
+			}
+			return masses;
+		}
+
+		private IEnumerable<double[]> recur_(List<List<double>> protMasses, int startPos, int length, double[] soFar, int pos)
+		{
+			if(pos == length)
+				yield return soFar;
+			else
+			{
+				while(pos < length && protMasses [pos + startPos].Count == 1)
+				{
+					soFar [pos] = protMasses [pos + startPos][0];
+					pos++;					
+				}
+				if (pos == length)
+					yield return soFar;
+				else
+				{
+					foreach (double mass in protMasses[pos + startPos])
+					{
+						soFar[pos] = mass;
+						recur_ (protMasses, startPos, length, soFar, pos + 1);
+					}
+				}
+			}
+		}
+
+		public IEnumerable<PeptideHit> DigestFast(List<Protein> proteins, Queries AllQueries, DBOptions options)
         {
-            //HashSet<string> TargetPeptides = new HashSet<string>();
-            //Dictionary<string, int> TargetPeptides = new Dictionary<string, int>();
-            //Digest proteins and store peptides in a Dictionnary
-            //Does not fit in memory -> 360 Go ....
-            //dicOfPeptideSequences = new Dictionary<string, List<Protein>>();
-            //double minimumMonoisotopicPeakOffset = dbOptions.precursorMonoisotopicPeakCorrection ? dbOptions.minimumPrecursorMonoisotopicPeakOffset : 0;
-            //double maximumMonoisotopicPeakOffset = dbOptions.precursorMonoisotopicPeakCorrection ? dbOptions.maximumPrecursorMonoisotopicPeakOffset : 0;
-            foreach (Peptide peptide in ProteinSearcher.ProteinDigest(options, proteins, allowSNP))
-            {
-                //int firstIndex = AllQueries.BinarySearch(MassTolerance.MzFloor(peptide.MonoisotopicMass, options.precursorMassTolerance));
-                //if (firstIndex >= 0 && firstIndex < AllQueries.Count)
-                //    yield return new Tuple<Peptide, int>(peptide, firstIndex);
+			foreach(Protein protein in proteins)
+			{
+				List<List<double>> masses = GetProteinMasses (protein, options);
 
-                //foreach (Peptide peptide in ProteinSearcher.ProteinDigestNoEnzyme(dbOptions, proteins, AllQueries))
-                //if (!TargetPeptides.Contains(peptide.BaseSequence))
-                //{
-                foreach (Peptide modPeptide in peptide.GetVariablyModifiedPeptides(options.variableModifications, options.maximumVariableModificationIsoforms))
-                {
-                    modPeptide.SetFixedModifications(options.fixedModifications);
-                    int firstIndex = AllQueries.BinarySearch(MassTolerance.MzFloor(modPeptide.MonoisotopicMass, options.precursorMassTolerance));
-                    if (firstIndex >= 0 && firstIndex < AllQueries.Count)
-                        yield return new Tuple<Peptide, int>(modPeptide, firstIndex);
-                }
+				List<int> indices = options.DigestionEnzyme.GetDigestionSiteIndices(protein);
+				indices.Insert(0, 0);
+				indices.Add(protein.Length - 1);
 
-                //TODO check if this favors targets over decoys since proteins are sorted target->deco
-                //    TargetPeptides.Add(peptide.BaseSequence);
-                //}            
+				for(int i = 0; i < indices.Count; i++)
+				{
+					for (int j = i + 1; j < indices.Count; j++) {
+						int pepLength = indices [j] - indices [i];
+						if (pepLength > options.MinimumPeptideLength) {
+							if (pepLength > options.MaximumPeptideLength)
+								break;
+
+							foreach (double[] pepMasses in recur_(masses, indices[i], pepLength, new double[pepLength], 0)) {
+								double sum = 0.0;
+								foreach (double item in pepMasses)
+									sum += item;
+								int firstIndex = AllQueries.BinarySearch (MassTolerance.MzFloor (sum, options.precursorMassTolerance));
+								if (firstIndex >= 0 && firstIndex < AllQueries.Count)
+									yield return new PeptideHit (protein, pepMasses, sum, firstIndex);
+							}
+						}
+					}
+                }            
             }
         }
+
+		public IEnumerable<Tuple<Peptide, int>> DigestProteomeOnTheFlyBKP(List<Protein> proteins, bool allowSNP, Queries AllQueries)
+		{
+			foreach (Peptide peptide in ProteinSearcher.ProteinDigest(options, proteins, allowSNP))
+			{
+				foreach (Peptide modPeptide in peptide.GetVariablyModifiedPeptides(options.variableModifications, options.maximumVariableModificationIsoforms))
+				{
+					modPeptide.SetFixedModifications(options.fixedModifications);
+					int firstIndex = AllQueries.BinarySearch(MassTolerance.MzFloor(modPeptide.MonoisotopicMass, options.precursorMassTolerance));
+					if (firstIndex >= 0 && firstIndex < AllQueries.Count)
+						yield return new Tuple<Peptide, int>(modPeptide, firstIndex);
+				}            
+			}
+		}
 
         public IEnumerable<Tuple<Peptide, int>> DigestProteomeOnTheFlyFast(List<Protein> proteins, bool allowSNP, Queries AllQueries)
         {

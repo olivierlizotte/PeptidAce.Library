@@ -8,6 +8,21 @@ using System;
 
 namespace PeptidAce
 {
+	public class PeptideHit
+	{
+		public double[] masses;
+		public int firstIndex;
+		public Protein protein;
+		public double mass;
+		public PeptideHit (Protein p, double[] aaMasses, double pMass, int index)
+		{
+			masses = aaMasses;
+			protein = p;
+			firstIndex = index;
+			mass = pMass;
+		}
+	}
+
     public class stPeptide
     {
         public string Sequence;
