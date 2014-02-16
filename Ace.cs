@@ -134,6 +134,8 @@ namespace PeptidAce
                 }
                 else
                 {
+					dbOptions.ConSole.WriteLine ("Cannot load RAWs on OSX");
+					/*
                     dbOptions.ConSole.WriteLine("Loading Sectra " + sample.sSDF);
 
                     pwiz.CLI.msdata.MSDataFile msFile = new pwiz.CLI.msdata.MSDataFile(sample.sSDF);
@@ -147,7 +149,7 @@ namespace PeptidAce
                     if (dbOptions.SaveMSMSPeaks)
                         spectra.ExportMSMS(msmsIonFile);
 
-                    AllSpectras.Add(sample, spectra);
+                    AllSpectras.Add(sample, spectra);//*/
                 }           
             }
             return AllSpectras;            
@@ -185,7 +187,8 @@ namespace PeptidAce
             if (dbOptions.NoEnzymeSearch)
                 result.SetPrecursors(dbSearcher.Search(queries, ps.DigestProteomeOnTheFlyNoEnzyme(AllProteins, queries)));
             else
-                result.SetPrecursors(dbSearcher.Search(queries, ps.DigestProteomeOnTheFly(AllProteins, false, queries)));
+				result.SetPrecursors(dbSearcher.SearchFast(queries, AllProteins));
+				//result.SetPrecursors(dbSearcher.Search(queries, ps.DigestProteomeOnTheFly(AllProteins, false, queries)));
             dbOptions.ConSole.WriteLine(result.precursors.Count + " precursors matched !");
                         
             foreach (Precursor precursor in result.precursors)

@@ -1,0 +1,22 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="../PeptidAce.Server/SampleSearch.cs">
+    <Files>
+      <File FileName="../PeptidAce.Gpu/ProteinDigest.cs" Line="10" Column="7" />
+      <File FileName="Utilities/Curves/CurveFitter.cs" Line="5" Column="7" />
+      <File FileName="Morpheus/Spectra.cs" Line="118" Column="31" />
+      <File FileName="Ace.cs" Line="133" Column="1" />
+      <File FileName="Structures/MS1Spectrum.cs" Line="43" Column="14" />
+      <File FileName="Structures/Specrtum.cs" Line="17" Column="14" />
+      <File FileName="../PeptidAce.Server/ConSolUser.cs" Line="7" Column="7" />
+      <File FileName="../PeptidAce.Server/Program.cs" Line="55" Column="33" />
+      <File FileName="../PeptidAce.Server/SampleSearch.cs" Line="58" Column="6" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/caronlio/PeptidAce.Server/SampleSearch.cs" line="63" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

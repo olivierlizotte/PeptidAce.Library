@@ -129,43 +129,43 @@ namespace PeptidAce
             PrecursorScore = (options.precursorMassTolerance.Value - Math.Abs(PrecursorMzError)) / options.precursorMassTolerance.Value;
         }
 
-        public IEnumerable<ProductMatch> GetProductMZs(DBOptions options, List<MsMsPeak> peaks)//, List<double> theoretical_product_mzs = null)
-        {
-            // speed optimizations
-            //double[] experimental_masses = Query.spectrum.Masses;
-            //List<MSPeak> peaks = Query.spectrum.Peaks;
-            int num_experimental_peaks = peaks.Count;
-            TotalTheoreticalProducts = 0;
-            TotalWeightedProducts = 0;
-            //New version that should include charged ions
- 
-            foreach (ProductMatch matchTheo in options.fullFragment.ComputeFragments(Peptide.GetMasses(), Query.precursor.Charge))
-            {
-                TotalTheoreticalProducts++;
-                TotalWeightedProducts += matchTheo.weight;
-                double massDiff = options.productMassTolerance.Value;
-                double bestMz = -1;
-                double bestInt = 0;
+		public IEnumerable<ProductMatch> GetProductMZs(DBOptions options, List<MsMsPeak> peaks)//, List<double> theoretical_product_mzs = null)
+		{
+			// speed optimizations
+			//double[] experimental_masses = Query.spectrum.Masses;
+			//List<MSPeak> peaks = Query.spectrum.Peaks;
+			int num_experimental_peaks = peaks.Count;
+			TotalTheoreticalProducts = 0;
+			TotalWeightedProducts = 0;
+			//New version that should include charged ions
 
-                foreach (int index in Query.spectrum.GetIndexOfMZInRange(matchTheo.theoMz, options.productMassTolerance))
-                {
-                    if (peaks[index].Charge <= 0 || peaks[index].Charge == matchTheo.charge)
-                    {
+			foreach (ProductMatch matchTheo in options.fullFragment.ComputeFragments(Peptide.GetMasses(), Query.precursor.Charge))
+			{
+				TotalTheoreticalProducts++;
+				TotalWeightedProducts += matchTheo.weight;
+				double massDiff = options.productMassTolerance.Value;
+				double bestMz = -1;
+				double bestInt = 0;
 
-                        double diff = Numerics.CalculateMassError(peaks[index].MZ, matchTheo.theoMz, options.productMassTolerance.Units);
-                        if (Math.Abs(diff) < options.productMassTolerance.Value)
-                        {
-                            if (Math.Abs(diff) < Math.Abs(massDiff))//TODO Priority to intensity, or precision?
-                            {
-                                massDiff = diff;
-                                bestMz = peaks[index].MZ;
-                            }
-                            bestInt += peaks[index].Intensity;
-                        }
-                    }
-                }
-                if (bestMz >= 0)
-                {/*
+				foreach (int index in Query.spectrum.GetIndexOfMZInRange(matchTheo.theoMz, options.productMassTolerance))
+				{
+					if (peaks[index].Charge <= 0 || peaks[index].Charge == matchTheo.charge)
+					{
+
+						double diff = Numerics.CalculateMassError(peaks[index].MZ, matchTheo.theoMz, options.productMassTolerance.Units);
+						if (Math.Abs(diff) < options.productMassTolerance.Value)
+						{
+							if (Math.Abs(diff) < Math.Abs(massDiff))//TODO Priority to intensity, or precision?
+							{
+								massDiff = diff;
+								bestMz = peaks[index].MZ;
+							}
+							bestInt += peaks[index].Intensity;
+						}
+					}
+				}
+				if (bestMz >= 0)
+				{/*				
                     double secondIsoIntensity = 0.0;
                     //Check for second isotopic peak
                     double sIsoMass = matchTheo.theoMz + Numerics.IsotopicMassShift(1, matchTheo.charge);
@@ -180,23 +180,23 @@ namespace PeptidAce
                         }
                     }
                     if (secondIsoIntensity >= bestInt * 0.0107)//Second Isotope should be present... and should not account for less than 0.//*/
-                    {
-                        ProductMatch pMatch = new ProductMatch();
-                        pMatch.weight = matchTheo.weight;
-                        pMatch.theoMz = matchTheo.theoMz;// Utilities.MZFromMzSingleCharge(theoMass, charge);
-                        pMatch.obsMz = bestMz;// experimental_masses[bestIndex];
-                        pMatch.mass_diff = massDiff;
-                        pMatch.obsIntensity = bestInt;// Intensities[bestIndex];
-                        pMatch.charge = matchTheo.charge;// peaks[bestIndex].Charge;
-                        pMatch.Fragment = matchTheo.Fragment;
-                        pMatch.fragmentPos = matchTheo.fragmentPos;
-                        pMatch.normalizedIntensity = pMatch.obsIntensity / (Query.spectrum.InjectionTime * Query.spectrum.PrecursorIntensityPerMilliSecond);
-                        yield return pMatch;
-                    }
-                    //break;
-                }
-            }
-        }
+					{
+						ProductMatch pMatch = new ProductMatch();
+						pMatch.weight = matchTheo.weight;
+						pMatch.theoMz = matchTheo.theoMz;// Utilities.MZFromMzSingleCharge(theoMass, charge);
+						pMatch.obsMz = bestMz;// experimental_masses[bestIndex];
+						pMatch.mass_diff = massDiff;
+						pMatch.obsIntensity = bestInt;// Intensities[bestIndex];
+						pMatch.charge = matchTheo.charge;// peaks[bestIndex].Charge;
+						pMatch.Fragment = matchTheo.Fragment;
+						pMatch.fragmentPos = matchTheo.fragmentPos;
+						pMatch.normalizedIntensity = pMatch.obsIntensity / (Query.spectrum.InjectionTime * Query.spectrum.PrecursorIntensityPerMilliSecond);
+						yield return pMatch;
+					}
+					//break;
+				}
+			}
+		}
 
         public void Initialize(DBOptions options, IEnumerable<ProductMatch> productMZs)
         {
@@ -220,6 +220,7 @@ namespace PeptidAce
                     highestFragmentIntensity = match.obsIntensity;
                     //options.ConSole.WriteLine("fragment intensity higher than most intense fragment ... should not happen!");
             }
+
             AllProductMatches = cumulMatch;
             MatchingProductsFraction    = (double)MatchingWeightedProducts / (double) TotalWeightedProducts;
             MatchingIntensityFraction   = MatchingIntensity / (double)(highestFragmentIntensity * TotalTheoreticalProducts);

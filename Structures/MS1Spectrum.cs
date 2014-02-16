@@ -23,8 +23,8 @@ namespace PeptidAce
         public double MinMz { get; set; }
 
         public double MaxMz { get; set; }
-
-        public MS1Spectrum(int scanNumber, double retentionTimeInMin, pwiz.CLI.msdata.BinaryData intensities, pwiz.CLI.msdata.BinaryData masses, double scanDuration)
+		/*
+		public MS1Spectrum(int scanNumber, double retentionTimeInMin, pwiz.CLI.msdata.BinaryData intensities, pwiz.CLI.msdata.BinaryData masses, double scanDuration)
         {
             this.Peaks = new Spectrum(masses, intensities);
             this.ScanNumber = scanNumber;
@@ -40,6 +40,6 @@ namespace PeptidAce
                     MaxMz = mass;
             }
             this.ScanDuration = scanDuration;
-        }
+        }//*/
     }
 }

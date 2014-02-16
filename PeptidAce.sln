@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeptidAce.Library", "PeptidAce.Library.csproj", "{BE009560-23A6-4A75-8D9A-D1C651F18E17}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeptidAce.GPU", "..\PeptidAce.Gpu\PeptidAce.GPU.csproj", "{0F49C15B-592E-4371-878B-17E8B3299A9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeptidAce.Server", "..\PeptidAce.Server\PeptidAce.Server.csproj", "{48319484-324E-49B1-BF63-918CAB14687A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0F49C15B-592E-4371-878B-17E8B3299A9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F49C15B-592E-4371-878B-17E8B3299A9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F49C15B-592E-4371-878B-17E8B3299A9B}.Debug|x64.ActiveCfg = Debug|x64
+		{0F49C15B-592E-4371-878B-17E8B3299A9B}.Debug|x64.Build.0 = Debug|x64
+		{0F49C15B-592E-4371-878B-17E8B3299A9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F49C15B-592E-4371-878B-17E8B3299A9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F49C15B-592E-4371-878B-17E8B3299A9B}.Release|x64.ActiveCfg = Release|x64
+		{0F49C15B-592E-4371-878B-17E8B3299A9B}.Release|x64.Build.0 = Release|x64
+		{48319484-324E-49B1-BF63-918CAB14687A}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{48319484-324E-49B1-BF63-918CAB14687A}.Debug|Any CPU.Build.0 = Debug|x64
+		{48319484-324E-49B1-BF63-918CAB14687A}.Debug|x64.ActiveCfg = Debug|x64
+		{48319484-324E-49B1-BF63-918CAB14687A}.Debug|x64.Build.0 = Debug|x64
+		{48319484-324E-49B1-BF63-918CAB14687A}.Release|Any CPU.ActiveCfg = Release|x86
+		{48319484-324E-49B1-BF63-918CAB14687A}.Release|Any CPU.Build.0 = Release|x86
+		{48319484-324E-49B1-BF63-918CAB14687A}.Release|x64.ActiveCfg = Release|x64
+		{48319484-324E-49B1-BF63-918CAB14687A}.Release|x64.Build.0 = Release|x64
+		{BE009560-23A6-4A75-8D9A-D1C651F18E17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE009560-23A6-4A75-8D9A-D1C651F18E17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE009560-23A6-4A75-8D9A-D1C651F18E17}.Debug|x64.ActiveCfg = Debug|x64
+		{BE009560-23A6-4A75-8D9A-D1C651F18E17}.Debug|x64.Build.0 = Debug|x64
+		{BE009560-23A6-4A75-8D9A-D1C651F18E17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE009560-23A6-4A75-8D9A-D1C651F18E17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE009560-23A6-4A75-8D9A-D1C651F18E17}.Release|x64.ActiveCfg = Release|x64
+		{BE009560-23A6-4A75-8D9A-D1C651F18E17}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = ..\PeptidAce.Server\PeptidAce.Server.csproj
+	EndGlobalSection
+EndGlobal

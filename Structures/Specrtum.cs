@@ -10,10 +10,10 @@ namespace PeptidAce.Structures
         private List<double> intensities;
         private List<double> masses;
 
-        public Spectrum(pwiz.CLI.msdata.BinaryData masses, pwiz.CLI.msdata.BinaryData intensities)
+		/*public Spectrum(pwiz.CLI.msdata.BinaryData masses, pwiz.CLI.msdata.BinaryData intensities)
         {
             this.masses = new List<double>(masses);
             this.intensities = new List<double>(intensities);
-        }
+        }//*/
     }
 }

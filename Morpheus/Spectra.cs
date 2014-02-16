@@ -140,7 +140,7 @@ namespace PeptidAce
             Add(spectrum);
         }
 
-        public static Spectra Load(pwiz.CLI.msdata.MSDataFile msFile, DBOptions options, string filePath, bool loadMS = true, bool filterMS2 = true)
+		/*public static Spectra Load(pwiz.CLI.msdata.MSDataFile msFile, DBOptions options, string filePath, bool loadMS = true, bool filterMS2 = true)
         {
             //Find file name in msFile;
             string mzMlFilepath = filePath;
@@ -154,7 +154,7 @@ namespace PeptidAce
                 //TODO DONT forget to remove the limiter
                 //int maxNbMSMS = 10;
                 double LastMs1InjectionTime = 0;
-                for (int i = 0; i < num_spectra/* && i < 200*/; i++)//TODO Fix that later!
+                for (int i = 0; i < num_spectra; i++)//TODO Fix that later!
                 {
                     //Spectrum
                     pwiz.CLI.msdata.Spectrum spec = msFile.run.spectrumList.spectrum(i, true);
@@ -233,28 +233,7 @@ namespace PeptidAce
                             peaks.Sort(MsMsPeak.AscendingMzComparison);
                         }
 
-                        /*//TODO Validate that in most cases, next steps can calculate missing charge
-                        if (charge == 0)
                         {
-                            for (int c = options.minimumAssumedPrecursorChargeState; c <= options.maximumAssumedPrecursorChargeState; c++)
-                            {
-                                if (options.assignChargeStates)
-                                {
-                                    peaks = AssignChargeStates(peaks, c, options.productMassTolerance);
-                                    if (options.deisotope)
-                                    {
-                                        peaks = Deisotope(peaks, c, options.productMassTolerance);
-                                    }
-                                }
-
-                                double precursor_mass = Utilities.MassFromMZ(precursor_mz, c);
-
-                                ProductSpectrum spectrum = new ProductSpectrum(mzMlFilepath, scan_number, retention_time, fragmentation_method, precursor_mz, precursor_intensity, c, precursor_mass, peaks);
-                                spectra.Add(spectrum);
-                            }
-                        }
-                        else//*/
-                        {/*
                         if (options.assignChargeStates)
                         {
                             peaks = AssignChargeStatesbkp(peaks, charge, options.productMassTolerance);
@@ -262,7 +241,7 @@ namespace PeptidAce
                             {
                                 peaks = Deisotopebkp(peaks, charge, options.productMassTolerance);
                             }
-                        }//*/
+                        }
                             //peaks = AssignChargeStatesAndDeisotope(peaks, options.maximumAssumedPrecursorChargeState, options.productMassTolerance);
 
                             double precursor_mass = Numerics.MassFromMZ(precursor_mz, charge);
@@ -316,7 +295,7 @@ namespace PeptidAce
                 options.ConSole.WriteLine(ex.Message);
             }
             return spectra;
-        }
+        }//*/
 
         private static List<MsMsPeak> AssignChargeStates(List<MsMsPeak> peaks, int maxCharge, MassTolerance isotopicMzTolerance)
         {
