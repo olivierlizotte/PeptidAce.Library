@@ -28,7 +28,7 @@ namespace PeptidAce
         public Protease DigestionEnzyme;
         public int ToleratedMissedCleavages;
 
-        public double PSMFalseDiscoveryRate = 0.05;
+		public double PSMFalseDiscoveryRate = 0.02;
 
         public int NbPSMToKeep = 32;
         public string OutputFolder;

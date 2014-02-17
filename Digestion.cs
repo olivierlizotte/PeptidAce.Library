@@ -113,6 +113,22 @@ namespace PeptidAce
 						mods.Add (mass + mod.MonoisotopicMassShift);
 				masses.Add (mods);
 			}
+
+			//Protein NTerm Mods
+			foreach (Modification mod in options.fixedModifications)
+				if (mod.Type == ModificationType.ProteinNTerminus)
+					masses [0][0] = masses [0] [0] + mod.MonoisotopicMassShift;
+			foreach (Modification mod in options.variableModifications)
+				if (mod.Type == ModificationType.ProteinNTerminus)
+					masses [0].Add (masses [0] [0] + mod.MonoisotopicMassShift);
+
+			//Protein CTerm Mods
+			foreach (Modification mod in options.fixedModifications)
+				if (mod.Type == ModificationType.ProteinCTerminus)
+					masses [masses.Count - 1][0] = masses [masses.Count - 1] [0] + mod.MonoisotopicMassShift;
+			foreach (Modification mod in options.variableModifications)
+				if (mod.Type == ModificationType.ProteinCTerminus)
+					masses [masses.Count - 1].Add (masses [masses.Count - 1] [0] + mod.MonoisotopicMassShift);
 			return masses;
 		}
 
@@ -127,7 +143,7 @@ namespace PeptidAce
 					soFar [pos] = protMasses [pos + startPos][0];
 					pos++;					
 				}
-				if (pos == length)
+				if (pos >= length)
 					yield return soFar;
 				else
 				{
@@ -138,6 +154,88 @@ namespace PeptidAce
 					}
 				}
 			}
+		}
+
+		private IEnumerable<double[]> recur_debug(List<List<double>> protMasses, int startPos, int length, List<double> soFar, int pos)
+		{
+			if (pos == length)
+				yield return (soFar.ToArray());
+			else
+			{
+				while(pos < length && protMasses [pos + startPos].Count == 1)
+				{
+					soFar [pos] = protMasses [pos + startPos][0];
+					pos++;					
+				}
+				if (pos >= length)
+					yield return (soFar.ToArray());
+				else
+				{
+					foreach (double mass in protMasses[pos + startPos])
+					{
+						soFar[pos] = mass;
+						recur_debug (protMasses, startPos, length, soFar, pos + 1);
+					}
+				}
+			}
+		}
+		private IEnumerable<int[]> recur_index(List<List<double>> protMasses, int startPos, int length, int[] soFar, int pos)
+		{
+			if(pos == length)
+				yield return soFar;
+			else
+			{
+				while(pos < length && protMasses [pos + startPos].Count == 1)
+				{
+					soFar [pos] = 0;//protMasses [pos + startPos][0];
+					pos++;					
+				}
+				if (pos == length)
+					yield return soFar;
+				else
+				{
+					for(int i = 0; i < protMasses[pos + startPos].Count; i++)
+					{
+						soFar[pos] = i;
+						recur_index (protMasses, startPos, length, soFar, pos + 1);
+					}
+				}
+			}
+		}
+
+		public Peptide GetPeptide(PeptideHit hit)
+		{
+			Peptide peptide = new Peptide (hit.protein, hit.startIndex, hit.startIndex + hit.masses.Length - 1, hit.missedCleavage);
+			if (peptide.MonoisotopicMass != hit.mass) {
+				//Find modifications
+				Dictionary<int, List<Modification>> fixedMods = new  Dictionary<int, List<Modification>> ();
+				Dictionary<int, Modification> varMods = new  Dictionary<int, Modification> ();
+
+				double[] masses = peptide.GetMasses ();
+				for (int i = 0; i < masses.Length; i++) {
+					if (masses [i] != hit.masses [i]) {
+						foreach (Modification mod in options.fixedModifications)
+							if (mod.MonoisotopicMassShift + masses [i] == hit.masses[i]) {
+								masses [i] += mod.MonoisotopicMassShift;
+								List<Modification> list = new List<Modification> ();
+								list.Add (mod);
+								fixedMods.Add (i, list);
+							}
+
+						foreach (Modification mod in options.variableModifications)
+							if (mod.MonoisotopicMassShift + masses [i] == hit.masses[i]) {
+								masses [i] += mod.MonoisotopicMassShift;
+								varMods.Add (i, mod);
+							}
+					}
+				}
+				peptide.SetFixedModifications (fixedMods);
+				peptide.SetVariableModifications (varMods);
+
+				if (peptide.MonoisotopicMass != hit.mass)
+					peptide = peptide;
+			}
+			return peptide;
 		}
 
 		public IEnumerable<PeptideHit> DigestFast(List<Protein> proteins, Queries AllQueries, DBOptions options)
@@ -152,21 +250,24 @@ namespace PeptidAce
 
 				for(int i = 0; i < indices.Count; i++)
 				{
-					for (int j = i + 1; j < indices.Count; j++) {
+					int missedCleavage = 0;
+					for (int j = i + 1; j < indices.Count; j++) { 
 						int pepLength = indices [j] - indices [i];
 						if (pepLength > options.MinimumPeptideLength) {
 							if (pepLength > options.MaximumPeptideLength)
 								break;
 
-							foreach (double[] pepMasses in recur_(masses, indices[i], pepLength, new double[pepLength], 0)) {
-								double sum = 0.0;
+							foreach (double[] pepMasses in recur_debug(masses, indices[i], pepLength, new List<double>(new double[pepLength]), 0)) {
+								//foreach (int[] pepIndexes in recur_(masses, indices[i], pepLength, new double[pepLength], 0)) {
+								double sum = Constants.WATER_MONOISOTOPIC_MASS;
 								foreach (double item in pepMasses)
 									sum += item;
 								int firstIndex = AllQueries.BinarySearch (MassTolerance.MzFloor (sum, options.precursorMassTolerance));
 								if (firstIndex >= 0 && firstIndex < AllQueries.Count)
-									yield return new PeptideHit (protein, pepMasses, sum, firstIndex);
+									yield return new PeptideHit (protein, indices[i], pepMasses, sum, firstIndex, missedCleavage);
 							}
 						}
+						missedCleavage++;
 					}
                 }            
             }

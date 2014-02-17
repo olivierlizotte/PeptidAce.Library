@@ -11,15 +11,19 @@ namespace PeptidAce
 	public class PeptideHit
 	{
 		public double[] masses;
-		public int firstIndex;
+		public int startIndex;
+		public int firstQueryIndex;
 		public Protein protein;
 		public double mass;
-		public PeptideHit (Protein p, double[] aaMasses, double pMass, int index)
+		public int missedCleavage;
+		public PeptideHit (Protein p, int proteinIndexStart, double[] aaMasses, double pMass, int index, int pMissedCleavage)
 		{
 			masses = aaMasses;
 			protein = p;
-			firstIndex = index;
+			startIndex = proteinIndexStart;
+			firstQueryIndex = index;
 			mass = pMass;
+			missedCleavage = pMissedCleavage;
 		}
 	}
 
@@ -149,7 +153,44 @@ namespace PeptidAce
                     NextAminoAcid = '-';
             }
         }
-     
+
+		public Peptide(PeptideHit hit)
+			: base(GetSequence(hit.protein.BaseSequence, hit.startIndex, hit.startIndex + hit.masses.Length))
+		{
+			Parent = hit.protein;
+			Decoy = Parent.Decoy;
+
+			StartResidueNumber = hit.startIndex + 1;
+			EndResidueNumber = hit.startIndex + 1 + hit.masses.Length;
+			MissedCleavages = hit.missedCleavage;
+			if (StartResidueNumber < EndResidueNumber)
+			{
+				if (StartResidueNumber - 1 >= 0)
+					PreviousAminoAcid = Parent[StartResidueNumber - 1];
+				else
+					PreviousAminoAcid = '-';
+				if (EndResidueNumber + 1 < Parent.Length)
+					NextAminoAcid = Parent[EndResidueNumber + 1];
+				else
+					NextAminoAcid = '-';
+			}
+			else
+			{
+				//Reverse sequences are decoy
+				Decoy = true;
+				if (EndResidueNumber - 1 >= 0)
+					PreviousAminoAcid = Parent[EndResidueNumber - 1];
+				else
+					PreviousAminoAcid = '-';
+				if (StartResidueNumber + 1 < Parent.Length)
+					NextAminoAcid = Parent[StartResidueNumber + 1];
+				else
+					NextAminoAcid = '-';
+			}
+			//Add modifications
+
+		}
+
         public double[] GetMasses()
         {
             double cumul = Utilities.Constants.WATER_MONOISOTOPIC_MASS;

@@ -182,9 +182,9 @@ namespace PeptidAce
                         //}
                     }
                 }
-                Console.Write("\r{0}%   ", ((100 * NbSpectrum) / spectra.Count));
+				//Console.Write("\r{0}%   ", ((100 * NbSpectrum) / spectra.Count));
             }
-            Console.Write("\r{0}%   ", 100);
+			//Console.Write("\r{0}%   ", 100);
 
             //Sort queries to ease search
             this.Sort(AscendingPrecursorMassComparison);

@@ -29,23 +29,23 @@ namespace PeptidAce
 		/// </summary>
 		/// <param name="query"></param>
 		/// <param name="modified_peptide"></param>
-		private void ComputePSMFast(Query query, PeptideHit hit)
+		private void ComputePSMFast(Query query, PeptideHit hit, List<PSM> psmsFast)
 		{
-			PSM psm = new PSM (hit, query);
+			PSM psm = new PSM (hit, query);//TODO no need to create this if we only want to know MatchingProducts ... to optimize!
 			if (psm.MatchingProducts >= options.NbMinProducts)
 			{
-				if (query.psmsFast.Count < options.NbPSMToKeep)
-					query.psmsFast.Add(psm);
-				else if (query.psmsFast[options.NbPSMToKeep-1].MatchingProducts < psm.MatchingProducts)
+				if (psmsFast.Count < options.NbPSMToKeep)
+					psmsFast.Add(psm);
+				else if (psmsFast[options.NbPSMToKeep-1].MatchingProducts < psm.MatchingProducts)
 				{
 					for (int i = 0; i < query.psms.Count; i++)
-						if (query.psmsFast[i].MatchingProducts <= psm.MatchingProducts)
+						if (psmsFast[i].MatchingProducts <= psm.MatchingProducts)
 						{
-							query.psmsFast.Insert(i, psm);
+							psmsFast.Insert(i, psm);
 							break;
 						}
-					if (query.psmsFast.Count > options.NbPSMToKeep)
-						query.psmsFast.RemoveAt(options.NbPSMToKeep-1);
+					if (psmsFast.Count > options.NbPSMToKeep)
+						psmsFast.RemoveAt(options.NbPSMToKeep-1);
 				}
 			}
 		}
@@ -56,7 +56,7 @@ namespace PeptidAce
         /// </summary>
         /// <param name="query"></param>
         /// <param name="modified_peptide"></param>
-        private void ComputePSMs(Query query, Peptide modified_peptide)
+		private void ComputePSMs(Query query, Peptide modified_peptide)
         {
             PeptideSpectrumMatch psm = new PeptideSpectrumMatch(query, modified_peptide, options);
 
@@ -80,31 +80,64 @@ namespace PeptidAce
 
 		public Precursors SearchFast(Queries queries, List<Protein> proteins)
 		{
+			Dictionary<Query, List<PSM>> dicOfPSM = new Dictionary<Query, List<PSM>> ();
 			queries.dbOptions.ConSole.WriteLine("Mapping " + queries.Count + " queries to the digested proteome ... ");
 
 			long nbQueryConsidered = 0;
 			Digestion dg = new Digestion (options);
-			foreach (PeptideHit hit in dg.DigestFast(proteins, queries, options)) {
-				int indexPrecursor = hit.firstIndex;
+
+			//			Parallel.ForEach<PeptideHit> (dg.DigestFast (proteins, queries, options), (PeptideHit hit) => {
+		    foreach (PeptideHit hit in dg.DigestFast(proteins, queries, options)) {
+				int indexPrecursor = hit.firstQueryIndex;
 				double maximumMass = MassTolerance.MzTop (hit.mass, options.precursorMassTolerance);
 				double minimumMass = MassTolerance.MzFloor (hit.mass, options.precursorMassTolerance);
 
 				if (indexPrecursor < queries.Count && queries [indexPrecursor].precursor.Mass >= minimumMass) {
 					while (indexPrecursor < queries.Count && queries [indexPrecursor].precursor.Mass <= maximumMass) {
-
-						//Target (or decoy with enzyme digests)
-						Peptide peptide = new Peptide ();
-						ComputePSMFast (queries [indexPrecursor], hit);
-
+						lock (queries[indexPrecursor].psms)
+						{
+							List<PSM> psms;
+							if (dicOfPSM.ContainsKey (queries [indexPrecursor]))
+								psms = dicOfPSM [queries [indexPrecursor]];
+							else {
+								psms = new List<PSM> ();
+								dicOfPSM.Add (queries [indexPrecursor], psms);
+							}
+ 							ComputePSMFast (queries [indexPrecursor], hit, psms);
+						}
 						indexPrecursor++;
-
 					}
 
-					nbQueryConsidered += indexPrecursor - hit.firstIndex;
+					nbQueryConsidered += indexPrecursor - hit.firstQueryIndex;
 				} else
 					options.ConSole.WriteLine ("WTF####");
+			}//);
+			options.ConSole.WriteLine(nbQueryConsidered + " queries considered (Dictionary size: " + dicOfPSM.Count + ")");
+
+			//Create Peptide and PeptideSpectrumMatches from PSMs
+			foreach (Query query in dicOfPSM.Keys) {
+				foreach (PSM psm in dicOfPSM[query]) {
+					Peptide peptide = dg.GetPeptide (psm.peptide);
+					PeptideSpectrumMatch match = new PeptideSpectrumMatch (query, peptide, options);
+					query.psms.Add (match);
+				}
 			}
-			options.ConSole.WriteLine(nbQueryConsidered + " queries considered");
+
+			//Push PSMs to Precursor
+			foreach (Query query in queries)
+				query.precursor.psms_AllPossibilities.AddRange(query.psms);//No MERGE
+
+			//PeptideSpectrumMatches allPsms = new PeptideSpectrumMatches();
+			int nbAssignedPrecursor = 0;
+			foreach (Precursor precursor in queries.Precursors)
+				if (precursor.psms_AllPossibilities.Count > 0)
+					nbAssignedPrecursor++;
+
+			int nbAssignedQuery = 0;
+			foreach (Query query in queries)
+				if(query.psms.Count > 0)
+					nbAssignedQuery++;
+			options.ConSole.WriteLine(nbAssignedQuery + " queries matched [" + nbAssignedPrecursor + " precursors] out of " + nbQueryConsidered + " psm computed");
 
 			return queries.Precursors;
 		}
