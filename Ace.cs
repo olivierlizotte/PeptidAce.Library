@@ -188,7 +188,7 @@ namespace PeptidAce
                 result.SetPrecursors(dbSearcher.Search(queries, ps.DigestProteomeOnTheFlyNoEnzyme(AllProteins, queries)));
             else
 				result.SetPrecursors(dbSearcher.SearchFast(queries, AllProteins));
-				//result.SetPrecursors(dbSearcher.Search(queries, ps.DigestProteomeOnTheFly(AllProteins, false, queries)));
+			//result.SetPrecursors(dbSearcher.Search(queries, ps.DigestProteomeOnTheFlyBKP(AllProteins, false, queries)));
             dbOptions.ConSole.WriteLine(result.precursors.Count + " precursors matched !");
                         
             foreach (Precursor precursor in result.precursors)

@@ -16,6 +16,7 @@ namespace PeptidAce
         public double MinMZ;
         public double MaxRt;
         public double MinRt;
+		public double MaxMass = 0;
 
         private const bool HARMONIC_CHARGE_DETECTION = false;
 
@@ -196,8 +197,10 @@ namespace PeptidAce
             //REMOVE QUERIES RELATED TO AN ISOTOPE and Compute the average CoElution 
             Dictionary<ProductSpectrum, double> DicOfSpectrumIntensities = new Dictionary<ProductSpectrum, double>();
             for(int i = 0; i < this.Count; )
-            {
-                Query query = this[i];
+			{
+				Query query = this[i];
+				if(query.precursor.Mass > MaxMass)
+					MaxMass = query.precursor.Mass;
                 if (!Isotopes.ContainsKey(query.precursor.Track))
                 {
                     if (!DicOfSpectrumIntensities.ContainsKey(query.spectrum))
@@ -208,7 +211,8 @@ namespace PeptidAce
                 }
                 else
                     this.RemoveAt(i);
-            }
+			}
+			MaxMass = MassTolerance.MzTop (MaxMass, dbOptions.precursorMassTolerance);
                         
             //REMOVE Queries with Precursor intensities too low
             for (int i = 0; i < this.Count; )

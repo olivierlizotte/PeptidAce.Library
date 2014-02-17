@@ -134,7 +134,7 @@ namespace PeptidAce
 
 		private IEnumerable<double[]> recur_(List<List<double>> protMasses, int startPos, int length, double[] soFar, int pos)
 		{
-			if(pos == length)
+			if(pos >= length)
 				yield return soFar;
 			else
 			{
@@ -151,34 +151,43 @@ namespace PeptidAce
 					{
 						soFar[pos] = mass;
 						recur_ (protMasses, startPos, length, soFar, pos + 1);
+						yield return soFar;
 					}
 				}
 			}
 		}
 
-		private IEnumerable<double[]> recur_debug(List<List<double>> protMasses, int startPos, int length, List<double> soFar, int pos)
+		private IEnumerable<double[]> recur_debug(List<List<double>> protMasses, int startPos, int length, List<double> soFar, double maxMass, int pos, double sum)
 		{
-			if (pos == length)
+			if (pos >= length)
 				yield return (soFar.ToArray());
 			else
 			{
-				while(pos < length && protMasses [pos + startPos].Count == 1)
+				while(pos < length && sum < maxMass && protMasses [pos + startPos].Count == 1)
 				{
 					soFar [pos] = protMasses [pos + startPos][0];
+					sum += soFar [pos];
 					pos++;					
 				}
-				if (pos >= length)
-					yield return (soFar.ToArray());
+				if (pos >= length) {
+					if (sum < maxMass)
+						yield return (soFar.ToArray ());
+				}
 				else
 				{
 					foreach (double mass in protMasses[pos + startPos])
 					{
 						soFar[pos] = mass;
-						recur_debug (protMasses, startPos, length, soFar, pos + 1);
+						sum += mass;
+						if(sum < maxMass)
+							foreach(double[] rez in recur_debug (protMasses, startPos, length, soFar, maxMass, pos + 1, sum))
+								yield return rez;
+						sum -= mass;
 					}
 				}
 			}
 		}
+
 		private IEnumerable<int[]> recur_index(List<List<double>> protMasses, int startPos, int length, int[] soFar, int pos)
 		{
 			if(pos == length)
@@ -256,9 +265,10 @@ namespace PeptidAce
 						if (pepLength > options.MinimumPeptideLength) {
 							if (pepLength > options.MaximumPeptideLength)
 								break;
-
-							foreach (double[] pepMasses in recur_debug(masses, indices[i], pepLength, new List<double>(new double[pepLength]), 0)) {
+							int nbRecurDebugResults = 0;
+							foreach (double[] pepMasses in recur_debug(masses, indices[i], pepLength, new List<double>(new double[pepLength]), AllQueries.MaxMass, 0, 0.0)) {
 								//foreach (int[] pepIndexes in recur_(masses, indices[i], pepLength, new double[pepLength], 0)) {
+								nbRecurDebugResults++;
 								double sum = Constants.WATER_MONOISOTOPIC_MASS;
 								foreach (double item in pepMasses)
 									sum += item;
@@ -266,6 +276,7 @@ namespace PeptidAce
 								if (firstIndex >= 0 && firstIndex < AllQueries.Count)
 									yield return new PeptideHit (protein, indices[i], pepMasses, sum, firstIndex, missedCleavage);
 							}
+							options.ConSole.WriteLine ("Nb recur_debug count : " + nbRecurDebugResults);
 						}
 						missedCleavage++;
 					}
