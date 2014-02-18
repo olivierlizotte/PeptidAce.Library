@@ -77,9 +77,9 @@ namespace PeptidAce
         //TODO Check if those var are common with Precursor and remove zeroed out var
         public double ProbabilityScore()
         {
-            return MatchingNormalizedIntensity;
+            //return MatchingNormalizedIntensity;
             //return MatchingProducts + FragmentScore;// *PrecursorScore;
-            /*
+            
             DBOptions options = Query.options;
             //double score = FragmentScore() * PrecursorScore;// +ProductScore;
             double score = options.dIntensity * MatchingIntensity +

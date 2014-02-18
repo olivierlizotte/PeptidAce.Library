@@ -157,6 +157,9 @@ namespace PeptidAce
         }
     }//*/
 
+    /// <summary>
+    /// This class instantiate the fragment types to be used in a ProPheus search
+    /// </summary>
     public class FullFragments
     {
         List<FragmentGen> fragments;
@@ -189,6 +192,12 @@ namespace PeptidAce
             }
         }
 
+        /// <summary>
+        /// Iteratively returns all theoretical fragment masses from a given array of masses (list of Amino Acid mass + modification for each)
+        /// </summary>
+        /// <param name="masses"></param>
+        /// <param name="precursorKnownCharge"></param>
+        /// <returns></returns>
         public IEnumerable<ProductMatch> ComputeFragments(double[] masses, int precursorKnownCharge)
         {
             int maxCharge = precursorKnownCharge;
@@ -231,7 +240,7 @@ namespace PeptidAce
             }
         }
     }
-
+    /*
     /// <summary>
     /// Compute theoretical fragments based on a peptide sequence and the precursor charge
     /// </summary>
@@ -275,5 +284,5 @@ namespace PeptidAce
                 }
             }
         }
-    }
+    }//*/
 }

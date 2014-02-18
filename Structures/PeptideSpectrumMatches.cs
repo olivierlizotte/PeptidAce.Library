@@ -417,7 +417,7 @@ namespace PeptidAce
                 }
                 if (usedPsm)
                 {
-                    DicOfPsmFactor.Add(psm, psm.ProbabilityScore());//.MatchingIntensity);
+                    DicOfPsmFactor.Add(psm, psm.ProbabilityScore());//.MatchingIntensity);//psm.Query.precursor.Track.INTENSITY);
                     avgProbList.Add(psm.ProbabilityScore());
                 }
             }
@@ -464,17 +464,21 @@ namespace PeptidAce
                             if (mean - stDev > mean * 0.5)
                             {
                                 ProductMatch newPM = new ProductMatch(newPMList[0]);
+                                newPM.weight = 0.0;
                                 newPM.obsIntensity = 0.0;
                                 newPM.normalizedIntensity = 0.0;
                                 for (int i = 0; i < newPMList.Count; i++)
                                 {
                                     newPM.obsIntensity += newPMList[i].obsIntensity;
                                     newPM.normalizedIntensity += newPMList[i].normalizedIntensity;
+                                    if (newPMList[i].normalizedIntensity > 0.0)
+                                        newPM.weight++;
                                 }
                                 newPM.obsIntensity /= sumPsmFactor;
                                 newPM.normalizedIntensity /= sumPsmFactor;
 
-                                newPM.weight = matchList.Count * newPM.normalizedIntensity;
+                                //newPM.weight = matchList.Count * newPM.normalizedIntensity;
+                                newPM.weight *= newPM.normalizedIntensity;
                                 avgNormedInt += newPM.normalizedIntensity;
                                 products.Add(newPM);
                             }
@@ -507,18 +511,19 @@ namespace PeptidAce
                             {
                                 double timePoint = psm.Query.spectrum.RetentionTimeInMin * 1000.0 * 60.0;
                                 double intensityInCTrap = eCurvePerMs.GetLocalArea(timePoint, timePoint + psm.Query.spectrum.InjectionTime);
+                                double peakIntensity = 0.0;
                                 foreach (MsMsPeak peak in psm.Query.spectrum.Peaks)
                                 {
-                                    if (Math.Abs(Utilities.Numerics.CalculateMassError(peak.MZ, mz, dbOptions.productMassTolerance.Units)) <= dbOptions.productMassTolerance.Value)
-                                    {
-                                        newMatch.obsIntensity += peak.Intensity * DicOfPsmFactor[psm];
-                                        //MixedPrecursor.GetLocalArea
-                                        newMatch.normalizedIntensity += (peak.Intensity / intensityInCTrap) * DicOfPsmFactor[psm];
-                                        sumPsmFactor += DicOfPsmFactor[psm];
-                                        newMatch.weight += 1;
-//                                        newMatch.obsIntensity += peak.Intensity;// + peak.Intensity * DicOfPsmFactor[psm];
-//                                        newMatch.normalizedIntensity += peak.Intensity / (psm.Query.spectrum.PrecursorIntensityPerMilliSecond * psm.Query.spectrum.InjectionTime);
-                                    }
+                                    if (peak.Intensity > 0 && Math.Abs(Utilities.Numerics.CalculateMassError(peak.MZ, mz, dbOptions.productMassTolerance.Units)) <= dbOptions.productMassTolerance.Value)
+                                        peakIntensity += peak.Intensity;
+                                }
+                                if (peakIntensity > 0)
+                                {
+                                    newMatch.obsIntensity += peakIntensity * DicOfPsmFactor[psm];
+                                    //MixedPrecursor.GetLocalArea
+                                    newMatch.normalizedIntensity += (peakIntensity / intensityInCTrap) * DicOfPsmFactor[psm];
+                                    sumPsmFactor += DicOfPsmFactor[psm];
+                                    newMatch.weight++;
                                 }
                             }
                             if (newMatch.weight > 0)
