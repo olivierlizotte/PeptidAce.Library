@@ -135,6 +135,7 @@
     <Compile Include="Utilities\Interfaces\IConSol.cs" />
     <Compile Include="Utilities\MaxFlowHelper.cs" />
     <Compile Include="Utilities\Curves\Curve.cs" />
+    <Compile Include="Utilities\Methods\ContaminantRemoval.cs" />
     <Compile Include="Utilities\Methods\FDRizer.cs" />
     <Compile Include="Utilities\Methods\GradientDescent.cs" />
     <Compile Include="Utilities\Numerics.cs" />

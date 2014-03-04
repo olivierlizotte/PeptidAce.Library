@@ -22,6 +22,30 @@ namespace PeptidAce.Utilities
             get { return m_strLines; }
         }
 
+        public static void Export(string filename, params List<double>[] values)
+        {
+            vsCSVWriter writer = new vsCSVWriter(filename);
+            bool keepGoing = true;
+            int lineNumber = 0;
+            while(keepGoing)
+            {
+                keepGoing = false;
+                string line = "";
+                for (int i = 0; i < values.Length; i++)
+                    if (lineNumber < values[i].Count)
+                    {
+                        keepGoing = true;
+                        line += values[i][lineNumber] + ",";
+                    }
+                    else
+                        line += ",";
+
+                lineNumber++;
+                writer.AddLine(line);
+            }
+            writer.WriteToFile();
+        }
+
         private static int Count(string text, string pattern)
         {
             // Loop through all instances of the string 'text'.

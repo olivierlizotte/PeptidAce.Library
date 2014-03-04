@@ -145,24 +145,37 @@ namespace PeptidAce
                         string fragmentation_method = "unknown";
                         double isolationWindow = 1.0;
                         double injectionTime =  spec.scanList.scans[0].cvParam(pwiz.CLI.cv.CVID.MS_ion_injection_time).value;
+                        if (injectionTime <= 0.0)
+                            injectionTime = 120;
                         foreach (pwiz.CLI.msdata.Precursor precursor in spec.precursors)
                         {
-                            fragmentation_method = precursor.activation.cvParams[0].name;
-                            if (precursor.isolationWindow.cvParams.Count > 2 && (double)precursor.isolationWindow.cvParams[1].value == (double)precursor.isolationWindow.cvParams[2].value)
-                                isolationWindow = precursor.isolationWindow.cvParams[1].value;
-                            else if (precursor.isolationWindow.cvParams.Count > 2)
-                                options.ConSole.WriteLine("Weird Isolation Window");
+                            fragmentation_method = precursor.activation.cvParam(pwiz.CLI.cv.CVID.MS_fragmentation_information).name;
+                            if(string.IsNullOrEmpty(fragmentation_method) || fragmentation_method.Contains("nknown"))
+                                if(precursor.activation.cvParams.Count > 0)
+                                    fragmentation_method = precursor.activation.cvParams[0].name;
+
+                            isolationWindow = precursor.isolationWindow.cvParam(pwiz.CLI.cv.CVID.MS_isolation_width).value;
+                            //if (precursor.isolationWindow.cvParam(pwiz.CLI.cv.CVID.MS_isolation_width).value > 0)//s.Count > 2 && (double)precursor.isolationWindow.cvParams[1].value == (double)precursor.isolationWindow.cvParams[2].value)
+                            //    isolationWindow = precursor.isolationWindow.cvParams[1].value;
+                            //else if (precursor.isolationWindow.cvParams.Count > 2)
+                            //    options.ConSole.WriteLine("Weird Isolation Window");
+                            if (isolationWindow <= 0)
+                                isolationWindow = 2;
 
                             foreach (pwiz.CLI.msdata.SelectedIon ion in precursor.selectedIons)
                             {
                                 //Cycle through MS to get real precursor intensities
-                                precursor_mz = ion.cvParams[0].value;
-                                if (ion.cvParams.Count > 1)
-                                    charge = (int)ion.cvParams[1].value;
-                                //else
-                                //    dbOptions.ConSole.WriteLine("No charge computed for precursor ");
-                                if (ion.cvParams.Count > 2)
-                                    precursor_intensity = ion.cvParams[2].value;
+                                precursor_mz = ion.cvParam(pwiz.CLI.cv.CVID.MS_selected_ion_m_z).value;//.MS_isolation_width).value
+                                charge = (int)ion.cvParam(pwiz.CLI.cv.CVID.MS_charge_state).value;
+                                precursor_intensity = ion.cvParam(pwiz.CLI.cv.CVID.MS_peak_intensity).value;
+
+                                if (precursor_intensity <= 0)
+                                {
+                                    precursor_intensity = precursor.cvParam(pwiz.CLI.cv.CVID.MS_intensity_of_precursor_ion).value;
+                                    //precursor_mz = ion.cvParams[0].value;
+                                    //charge = (int)ion.cvParams[1].value;
+                                    //precursor_intensity = ion.cvParams[2].value;
+                                }
                             }
                         }
 

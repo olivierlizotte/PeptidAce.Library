@@ -99,5 +99,39 @@ namespace PeptidAce.Utilities
         {
             return MassTolerance.MzTop(mz1, tol);
         }//*/
+
+        public static IEnumerable<double> GetValuesInRange(List<double> sortedMzs, double mz, MassTolerance tolerance)
+        {
+            double minimum_precursor_mz = MassTolerance.MzFloor(mz, tolerance);
+            double maximum_precursor_mz = MassTolerance.MzTop(mz, tolerance);
+            int low_index = BinarySearchMZ(sortedMzs, minimum_precursor_mz);
+
+            if (low_index >= 0 && low_index < sortedMzs.Count && sortedMzs[low_index] >= minimum_precursor_mz)
+                for (int i = low_index; i < sortedMzs.Count && sortedMzs[i] <= maximum_precursor_mz; i++)
+                    yield return sortedMzs[i];
+        }
+
+        private static int BinarySearchMZ(List<double> sortedMzs, double lowestPrecursorMz)
+        {
+            int low_index = 0;
+            int high_index = sortedMzs.Count - 1;
+            while (low_index <= high_index)
+            {
+                int mid_index = low_index + ((high_index - low_index) / 2);
+                int comparison = sortedMzs[mid_index].CompareTo(lowestPrecursorMz);
+                if (comparison == 0)
+                {
+                    while (mid_index > low_index && sortedMzs[mid_index - 1].CompareTo(lowestPrecursorMz) == 0)
+                        mid_index--;
+
+                    return mid_index;
+                }
+                if (comparison < 0)
+                    low_index = mid_index + 1;
+                else
+                    high_index = mid_index - 1;
+            }
+            return low_index;
+        }
     }
 }

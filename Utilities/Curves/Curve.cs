@@ -88,7 +88,7 @@ namespace PeptidAce.Utilities
             if (interpole != null)
             {
                 double intensity = interpole.Interpolate(timePoint);
-                if (intensity < 0)
+                if (intensity < 0 || double.IsNaN(intensity))
                     return 0;
                 else
                     return intensity;
@@ -109,7 +109,7 @@ namespace PeptidAce.Utilities
                 intensityCount = new List<double>(dicNoDupe.Values);
             }
 
-            if(time != null && time.Count > 8)
+            if(time != null && (time.Count > 8 || (time.Count >=4 && type == CurveType.LINEAR)))
             {                    
                 double[] arrayTime = time.ToArray();
                 double[] arrayIntensity = intensityCount.ToArray();

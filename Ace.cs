@@ -25,7 +25,9 @@ namespace PeptidAce
             pAce.Preload(loadMS1, filterMS2);
             pAce.PrepareQueries();
 
-            return pAce.LaunchSearch(pAce.AllQueries);
+            if(pAce.AllQueries.Count > 0)
+                return pAce.LaunchSearch(pAce.AllQueries);
+            return null;
         }
 
         public DBOptions dbOptions;
