@@ -160,7 +160,14 @@ namespace PeptidAce
                             //else if (precursor.isolationWindow.cvParams.Count > 2)
                             //    options.ConSole.WriteLine("Weird Isolation Window");
                             if (isolationWindow <= 0)
-                                isolationWindow = 2;
+                            {
+                                double lower = precursor.isolationWindow.cvParam(pwiz.CLI.cv.CVID.MS_isolation_window_lower_offset).value;
+                                double upper = precursor.isolationWindow.cvParam(pwiz.CLI.cv.CVID.MS_isolation_window_upper_offset).value;
+                                isolationWindow = lower + upper;
+                                //pwiz.CLI.cv.CVID.MS_isolation_window_upper_offset
+                                if (isolationWindow <= 0)
+                                    isolationWindow = 2;
+                            }
 
                             foreach (pwiz.CLI.msdata.SelectedIon ion in precursor.selectedIons)
                             {

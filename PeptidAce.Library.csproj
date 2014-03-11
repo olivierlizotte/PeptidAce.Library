@@ -95,6 +95,7 @@
     <Compile Include="Morpheus\Modification.cs" />
     <Compile Include="Morpheus\ModificationDictionary.cs" />
     <Compile Include="Morpheus\ModificationType.cs" />
+    <Compile Include="Structures\AnnotatedSpectrum.cs" />
     <Compile Include="Structures\ITargetDecoy.cs" />
     <Compile Include="Structures\MsMsPeak.cs" />
     <Compile Include="MSSearcher.cs" />
@@ -127,6 +128,7 @@
     <Compile Include="Structures\Track.cs" />
     <Compile Include="Morpheus\Terminus.cs" />
     <Compile Include="Structures\Tracks.cs" />
+    <Compile Include="UnitTests\HistonePositionnalIsomer.cs" />
     <Compile Include="Utilities\Curves\CurveFitter.cs" />
     <Compile Include="Utilities\Curves\ElutionCurveMaxFlow.cs" />
     <Compile Include="Utilities\Fasta\FastaRead.cs" />

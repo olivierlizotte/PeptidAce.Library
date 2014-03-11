@@ -35,9 +35,9 @@ namespace PeptidAce
 
             if (psm.MatchingProducts >= options.NbMinProducts)
             {
-                if (query.psms.Count < options.NbPSMToKeep)
+                if (query.psms.Count == 0)
                     query.psms.Add(psm);
-                else if (query.psms[options.NbPSMToKeep-1].ProbabilityScore() < psm.ProbabilityScore())
+                else if (query.psms[query.psms.Count - 1].ProbabilityScore() < psm.ProbabilityScore())
                 {
                     for (int i = 0; i < query.psms.Count; i++)
                         if (query.psms[i].ProbabilityScore() <= psm.ProbabilityScore())
@@ -63,7 +63,8 @@ namespace PeptidAce
             queries.dbOptions.ConSole.WriteLine("Mapping " + queries.Count + " queries to the digested proteome ... ");
 
             long nbQueryConsidered = 0;
-            Parallel.ForEach<Tuple<Peptide, int>>(fittingPeptides, (Tuple<Peptide, int> hit) =>            
+            foreach(Tuple<Peptide, int> hit in fittingPeptides)
+            //Parallel.ForEach<Tuple<Peptide, int>>(fittingPeptides, (Tuple<Peptide, int> hit) =>            
             {
                 int indexPrecursor = hit.Item2;
                 double maximumMass = MassTolerance.MzTop(hit.Item1.MonoisotopicMass, options.precursorMassTolerance);
@@ -91,7 +92,7 @@ namespace PeptidAce
                 }
                 else
                     options.ConSole.WriteLine("WTF####");
-            });
+            }//);
 
             //Push PSMs to Precursor
             foreach (Query query in queries)

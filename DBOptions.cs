@@ -120,5 +120,80 @@ namespace PeptidAce
             this.OutputFolder = @"C:\_IRIC\DATA\Test2";//C:\Documents and Settings\ProteoAdmin\Desktop\AEffacer\Morpheus\Output";
             this.MinimumPSMScore = 0.0001;         
         }
+
+        public void RandomizeParams()
+        {
+            Random r = new Random();
+
+            dProduct = r.NextDouble();
+            dPrecursor = r.NextDouble();
+            dMatchingProductFraction = r.NextDouble();
+            dMatchingProduct = r.NextDouble();
+            dIntensityFraction = r.NextDouble();
+            dIntensity = 0;// r.NextDouble();
+            dProtein = r.NextDouble();
+            dPeptideScore = r.NextDouble();
+            dFragmentScore = r.NextDouble();
+        }
+
+        public void Save(string fileName)
+        {
+            vsCSVWriter writer = new vsCSVWriter(fileName);
+            writer.AddLine( "MinimumPrecursorChargeState = " +  MinimumPrecursorChargeState);
+            writer.AddLine( "MaximumPrecursorChargeState"+ MaximumPrecursorChargeState);
+            writer.AddLine( "MaximumNumberOfFragmentsPerSpectrum"+ MaximumNumberOfFragmentsPerSpectrum);
+            writer.AddLine( "FastaDatabaseFilepath"+ FastaDatabaseFilepath);
+            writer.AddLine( "MaximumPeptideMass"+ MaximumPeptideMass);
+            writer.AddLine( "DecoyFusion"+ DecoyFusion);
+
+            writer.AddLine( "DigestionEnzyme"+ DigestionEnzyme);
+            writer.AddLine( "ToleratedMissedCleavages"+ ToleratedMissedCleavages);
+
+            writer.AddLine( "PSMFalseDiscoveryRate"+ PSMFalseDiscoveryRate);
+
+            writer.AddLine( "NbPSMToKeep"+ NbPSMToKeep);
+            writer.AddLine( "OutputFolder"+ OutputFolder);
+            writer.AddLine( "MinimumPSMScore"+ MinimumPSMScore);
+            writer.AddLine( "MinimumPeptideLength"+ MinimumPeptideLength);
+            writer.AddLine( "MaximumPeptideLength"+ MaximumPeptideLength);
+
+            writer.AddLine( "fullFragment"+ fullFragment);
+            //public Fragments fragments;
+            writer.AddLine( "NbMinProducts"+ NbMinProducts);
+
+            writer.AddLine( "addFragmentLoss"+ addFragmentLoss);
+            writer.AddLine( "addFragmentMods"+ addFragmentMods);
+            writer.AddLine( "NoEnzymeSearch"+ NoEnzymeSearch);
+            writer.AddLine( "WriteMaxQuantPeakFile"+ WriteMaxQuantPeakFile);
+
+            writer.AddLine( "SaveMS1Peaks"+ SaveMS1Peaks);
+            writer.AddLine( "SaveMSMSPeaks"+ SaveMSMSPeaks);
+
+            writer.AddLine( "LoadSpectraIfFound"+ LoadSpectraIfFound);
+
+            writer.AddLine( "ComputedRetentionTimeDiff"+ ComputedRetentionTimeDiff);//TODO compute this after alignment step, based on common identifications
+            writer.AddLine( "EffectiveIsolationWindowRatio"+ EffectiveIsolationWindowRatio);//TODO optimize this value 
+            writer.AddLine( "MinimumPrecursorIntensityRatioInIsolationWindow"+ MinimumPrecursorIntensityRatioInIsolationWindow);
+
+
+            writer.AddLine( "dProduct " +dProduct);
+            writer.AddLine( "dPrecursor "+ dPrecursor);
+            writer.AddLine( "dMatchingProductFraction "+ dMatchingProductFraction);
+            writer.AddLine( "dMatchingProduct "+ dMatchingProduct);
+            writer.AddLine( "dIntensityFraction "+ dIntensityFraction);
+            writer.AddLine( "dIntensity "+ dIntensity);
+            writer.AddLine( "dProtein "+dProtein);
+            writer.AddLine( "dPeptideScore "+dPeptideScore);
+            writer.AddLine( "dFragmentScore "+dFragmentScore);
+
+            ///Values kept from the original Morpheus source code
+            writer.AddLine(  "initiatorMethionineBehavior ," +initiatorMethionineBehavior);
+            writer.AddLine(  "fixedModifications ," +fixedModifications);
+            writer.AddLine(  "variableModifications ," +variableModifications);
+            writer.AddLine(  "maximumVariableModificationIsoforms," + maximumVariableModificationIsoforms);
+            writer.AddLine(  "precursorMassTolerance,," + precursorMassTolerance);
+            writer.AddLine(  "productMassTolerance," +productMassTolerance);
+            writer.WriteToFile();
+        }
     }
 }
