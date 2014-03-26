@@ -422,7 +422,8 @@ namespace PeptidAce
                 }
             }
             double avgProbability = MathNet.Numerics.Statistics.ArrayStatistics.Mean(avgProbList.ToArray());
-            avgProbability -= MathNet.Numerics.Statistics.ArrayStatistics.Variance(avgProbList.ToArray());
+            avgProbability -= avgProbability * 0.5;
+                //MathNet.Numerics.Statistics.ArrayStatistics.Variance(avgProbList.ToArray());
 
             double avgNormedInt = 0;
             List<ProductMatch> products = new List<ProductMatch>();
@@ -461,7 +462,7 @@ namespace PeptidAce
                             double variance = Numerics.Variance(nIArray);
                             double stDev = MathNet.Numerics.Statistics.ArrayStatistics.StandardDeviation(nIArray);
                             double mean = MathNet.Numerics.Statistics.ArrayStatistics.Mean(nIArray);
-                            if (mean - stDev > mean * 0.5)
+                            if (mean - stDev > mean * 0.5 || variance < mean * 0.5)
                             {
                                 ProductMatch newPM = new ProductMatch(newPMList[0]);
                                 newPM.weight = 0.0;

@@ -59,11 +59,11 @@ namespace PeptidAce.Utilities
             return count;
         }
         
-        public static string[] Split_HandleQuotes(string line, long nbColMax = int.MaxValue)
+        public static string[] Split_HandleQuotes(string line, long nbColMax = 1000)
         {
             char[] separator = { ',' };
             string[] array = line.Split(_Generic_Separator);
-            string[] columns = new string[nbColMax];
+            List<string> columns = new List<string>();
             bool inQuotes = false;
             int iter = -1;
             for(int i = 0; i < array.Length && iter + 1 < nbColMax; i++)
@@ -73,13 +73,13 @@ namespace PeptidAce.Utilities
                 else
                 {
                     iter++;
-                    columns[iter] = array[i];
+                    columns.Add(array[i]);
                 }
 
                 if (Count(array[i], "\"") % 2 != 0)
                     inQuotes = !inQuotes;
             }
-            return columns;
+            return columns.ToArray();
         }
         
         //Necessary variables 

@@ -113,6 +113,38 @@ namespace PeptidAce
             return AllProteins;
         }        
         
+        public static Spectra LoadSpectra(string file, DBOptions dbOptions, bool loadMS = true, bool filterMS2 = true)
+        {
+            string trackFile = vsCSV.GetFolder(file) + vsCSV.GetFileName_NoExtension(file) + "_Tracks.csv";
+            string msmsIonFile = vsCSV.GetFolder(file) + vsCSV.GetFileName_NoExtension(file) + "_MSMSIons.csv";
+            if (dbOptions.LoadSpectraIfFound && System.IO.File.Exists(trackFile)
+                                            && System.IO.File.Exists(msmsIonFile))
+            {
+                dbOptions.ConSole.WriteLine("Loading Sectra from " + trackFile + " AND " + msmsIonFile);
+                if (loadMS)
+                    return Spectra.Import(msmsIonFile, trackFile, dbOptions);
+                else
+                    return Spectra.Import(msmsIonFile, null, dbOptions);
+            }
+            else
+            {
+                dbOptions.ConSole.WriteLine("Loading Sectra " + file);
+
+                pwiz.CLI.msdata.MSDataFile msFile = new pwiz.CLI.msdata.MSDataFile(file);
+                Spectra spectra = Spectra.Load(msFile, dbOptions, file, loadMS, filterMS2);
+                spectra.Sort(ProductSpectrum.AscendingPrecursorMassComparison);
+
+                dbOptions.ConSole.WriteLine(file + " [" + spectra.Count + " msms scans]");
+                if (dbOptions.SaveMS1Peaks)
+                    spectra.ExportTracks(trackFile);
+
+                if (dbOptions.SaveMSMSPeaks)
+                    spectra.ExportMSMS(msmsIonFile);
+
+                return spectra;
+            }
+        }
+
         /// <summary>
         /// Loads spectra from Raw files
         /// </summary>
@@ -124,34 +156,7 @@ namespace PeptidAce
             for (int i = 0; i < Project.Count; i++)
             {
                 Sample sample = Project[i];
-                string trackFile = vsCSV.GetFolder(sample.sSDF) + vsCSV.GetFileName_NoExtension(sample.sSDF) + "_Tracks.csv";
-                string msmsIonFile = vsCSV.GetFolder(sample.sSDF) + vsCSV.GetFileName_NoExtension(sample.sSDF) + "_MSMSIons.csv";
-                if(dbOptions.LoadSpectraIfFound && System.IO.File.Exists(trackFile)
-                                                && System.IO.File.Exists(msmsIonFile))
-                {
-                    dbOptions.ConSole.WriteLine("Loading Sectra from " + trackFile + " AND " + msmsIonFile);                    
-                    if(loadMS)
-                        AllSpectras.Add(sample, Spectra.Import(msmsIonFile, trackFile, dbOptions));
-                    else
-                        AllSpectras.Add(sample, Spectra.Import(msmsIonFile, null, dbOptions));
-                }
-                else
-                {
-                    dbOptions.ConSole.WriteLine("Loading Sectra " + sample.sSDF);
-
-                    pwiz.CLI.msdata.MSDataFile msFile = new pwiz.CLI.msdata.MSDataFile(sample.sSDF);
-                    Spectra spectra = Spectra.Load(msFile, dbOptions, sample.sSDF, loadMS, filterMS2);
-                    spectra.Sort(ProductSpectrum.AscendingPrecursorMassComparison);
-
-                    dbOptions.ConSole.WriteLine(sample.sSDF + " [" + spectra.Count + " msms scans]");
-                    if (dbOptions.SaveMS1Peaks)
-                        spectra.ExportTracks(trackFile);
-
-                    if (dbOptions.SaveMSMSPeaks)
-                        spectra.ExportMSMS(msmsIonFile);
-
-                    AllSpectras.Add(sample, spectra);
-                }           
+                AllSpectras.Add(sample, LoadSpectra(sample.sSDF, dbOptions, loadMS, filterMS2));
             }
             List<Sample> keys = new List<Sample>(AllSpectras.Keys);
             foreach (Sample s in keys)

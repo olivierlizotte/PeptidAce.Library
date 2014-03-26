@@ -120,6 +120,38 @@ namespace PeptidAce
             this.OutputFolder = @"C:\_IRIC\DATA\Test2";//C:\Documents and Settings\ProteoAdmin\Desktop\AEffacer\Morpheus\Output";
             this.MinimumPSMScore = 0.0001;         
         }
+        /*
+        private Dictionary<double, double> dicOfScore = null;
+        public void UptimizeParams(bool currentTrendIsGood)
+        {
+            if (dicOfScore == null)
+            {
+                dicOfScore = new Dictionary<double, double>();
+                dicOfScore.Add(1.0, dProduct);
+                dicOfScore.Add(2.0, dPrecursor);
+                dicOfScore.Add(3.0, dMatchingProductFraction);
+                dicOfScore.Add(4.0, dMatchingProduct);
+                dicOfScore.Add(5.0, dIntensityFraction);
+                dicOfScore.Add(6.0, dIntensity);
+                dicOfScore.Add(7.0, dProtein);
+                dicOfScore.Add(8.0, dPeptideScore);
+                dicOfScore.Add(9.0, dFragmentScore);
+            }
+
+            Utilities.Methods.GradientDescent.SolveMaxFlowStyle(unitSpectrum, mixedSpectrum, out solution, out tmpUnderflow, ConSole, stepSize);
+                
+            Random r = new Random();
+
+            dProduct = r.NextDouble();
+            dPrecursor = r.NextDouble();
+            dMatchingProductFraction = r.NextDouble();
+            dMatchingProduct = 0;// r.NextDouble();
+            dIntensityFraction = r.NextDouble();
+            dIntensity = 0;// r.NextDouble() * 0.0001;
+            dProtein = r.NextDouble();
+            dPeptideScore = r.NextDouble();
+            dFragmentScore = r.NextDouble();
+        }//*/
 
         public void RandomizeParams()
         {
@@ -128,9 +160,9 @@ namespace PeptidAce
             dProduct = r.NextDouble();
             dPrecursor = r.NextDouble();
             dMatchingProductFraction = r.NextDouble();
-            dMatchingProduct = r.NextDouble();
+            dMatchingProduct = 0;// r.NextDouble();
             dIntensityFraction = r.NextDouble();
-            dIntensity = 0;// r.NextDouble();
+            dIntensity = 0;// r.NextDouble() * 0.0001;
             dProtein = r.NextDouble();
             dPeptideScore = r.NextDouble();
             dFragmentScore = r.NextDouble();
@@ -176,15 +208,15 @@ namespace PeptidAce
             writer.AddLine( "MinimumPrecursorIntensityRatioInIsolationWindow"+ MinimumPrecursorIntensityRatioInIsolationWindow);
 
 
-            writer.AddLine( "dProduct " +dProduct);
-            writer.AddLine( "dPrecursor "+ dPrecursor);
-            writer.AddLine( "dMatchingProductFraction "+ dMatchingProductFraction);
-            writer.AddLine( "dMatchingProduct "+ dMatchingProduct);
-            writer.AddLine( "dIntensityFraction "+ dIntensityFraction);
-            writer.AddLine( "dIntensity "+ dIntensity);
-            writer.AddLine( "dProtein "+dProtein);
-            writer.AddLine( "dPeptideScore "+dPeptideScore);
-            writer.AddLine( "dFragmentScore "+dFragmentScore);
+            writer.AddLine("dProduct =" + dProduct + ";");
+            writer.AddLine("dPrecursor =" + dPrecursor + ";");
+            writer.AddLine("dMatchingProductFraction =" + dMatchingProductFraction + ";");
+            writer.AddLine("dMatchingProduct =" + dMatchingProduct + ";");
+            writer.AddLine("dIntensityFraction =" + dIntensityFraction + ";");
+            writer.AddLine("dIntensity =" + dIntensity + ";");
+            writer.AddLine("dProtein =" + dProtein + ";");
+            writer.AddLine("dPeptideScore =" + dPeptideScore + ";");
+            writer.AddLine("dFragmentScore =" + dFragmentScore + ";");
 
             ///Values kept from the original Morpheus source code
             writer.AddLine(  "initiatorMethionineBehavior ," +initiatorMethionineBehavior);

@@ -91,7 +91,7 @@ namespace PeptidAce.Utilities.Methods
 
             underflow = underError;
         }//*/
-
+        
         public class GDHelper
         {
             private List<Dictionary<double, double>> units;

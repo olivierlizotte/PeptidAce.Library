@@ -31,6 +31,15 @@ namespace PeptidAce
             FileName = projectFileName;
             dbOptions = options;
         }
+
+        public List<int> GetConditions()
+        {
+            Dictionary<int, int> dic = new Dictionary<int, int>();
+            foreach (Sample sample in this)
+                if (!dic.ContainsKey(sample.PROJECT.CONDITION))
+                    dic.Add(sample.PROJECT.CONDITION, 1);
+            return new List<int>(dic.Keys);
+        }
         /*
         public static vsSDF LoadSDF(Sample project)
         {
