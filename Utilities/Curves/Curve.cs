@@ -126,13 +126,15 @@ namespace PeptidAce.Utilities
                     switch(cType)
                     {
                         case CurveType.AKIMA:
-                            interpole = new MathNet.Numerics.Interpolation.Algorithms.AkimaSplineInterpolation(time, intensityCount);
+                            interpole = MathNet.Numerics.Interpolation.LinearSpline.Interpolate(time, intensityCount);
+                            //interpole = new MathNet.Numerics.Interpolation.NevillePolynomialInterpolation(time, intensityCount);
+                            //interpole = new MathNet.Numerics.Interpolation.Algorithms.AkimaSplineInterpolation(time, intensityCount);
                             break;
                         case CurveType.LINEAR:
-                            interpole = MathNet.Numerics.Interpolation.Interpolate.LinearBetweenPoints(time, intensityCount);
+                            interpole = MathNet.Numerics.Interpolation.LinearSpline.Interpolate(time, intensityCount);
                             break;
                         case CurveType.SPLINE:
-                            interpole = new MathNet.Numerics.Interpolation.Algorithms.CubicSplineInterpolation(time, intensityCount);
+                            interpole = new MathNet.Numerics.Interpolation.BulirschStoerRationalInterpolation(time, intensityCount);
                             break;
                     }
                     //Area = interpole.Integrate(time[time.Count - 1]);
@@ -161,13 +163,17 @@ namespace PeptidAce.Utilities
                         switch (cType)
                         {
                             case CurveType.AKIMA:
-                                interpole = new MathNet.Numerics.Interpolation.Algorithms.AkimaSplineInterpolation(interpolatedTime, interpolatedIntensityCount);
+                                interpole = MathNet.Numerics.Interpolation.LinearSpline.Interpolate(time, intensityCount);
+                                //interpole = new MathNet.Numerics.Interpolation.NevillePolynomialInterpolation(time, intensityCount);
+                                //interpole = new MathNet.Numerics.Interpolation.Algorithms.AkimaSplineInterpolation(interpolatedTime, interpolatedIntensityCount);
                                 break;
                             case CurveType.LINEAR:
-                                interpole = MathNet.Numerics.Interpolation.Interpolate.LinearBetweenPoints(interpolatedTime, interpolatedIntensityCount);
+                                interpole = MathNet.Numerics.Interpolation.LinearSpline.Interpolate(time, intensityCount);
+                                //interpole = MathNet.Numerics.Interpolation.Interpolate.LinearBetweenPoints(interpolatedTime, interpolatedIntensityCount);
                                 break;
                             case CurveType.SPLINE:
-                                interpole = new MathNet.Numerics.Interpolation.Algorithms.CubicSplineInterpolation(interpolatedTime, interpolatedIntensityCount);
+                                interpole = new MathNet.Numerics.Interpolation.BulirschStoerRationalInterpolation(time, intensityCount);
+                                //interpole = new MathNet.Numerics.Interpolation.Algorithms.CubicSplineInterpolation(interpolatedTime, interpolatedIntensityCount);
                                 break;
                         }
                         double areaSmooth = interpole.Integrate(interpolatedTime[interpolatedTime.Count - 1]);

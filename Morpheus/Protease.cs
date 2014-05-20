@@ -72,26 +72,34 @@ namespace PeptidAce
         {
             List<int> indices = new List<int>();
 
+            bool inMod = false;
             for(int i = 0; i < aminoAcidPolymer.Length - 1; i++)
             {
-                foreach(char c in AminoAcidsInducingCleavage)
+                if (aminoAcidPolymer[i] == '(')
+                    inMod = true;
+                if (aminoAcidPolymer[i] == ')')
+                    inMod = false;
+                if (!inMod)
                 {
-                    if((CleavageTerminus != Terminus.N && aminoAcidPolymer[i] == c)
-                        || (CleavageTerminus == Terminus.N && i + 1 < aminoAcidPolymer.Length && aminoAcidPolymer[i + 1] == c))
+                    foreach (char c in AminoAcidsInducingCleavage)
                     {
-                        bool cleave = true;
-                        foreach(char nc in AminoAcidsPreventingCleavage)
+                        if ((CleavageTerminus != Terminus.N && aminoAcidPolymer[i] == c)
+                            || (CleavageTerminus == Terminus.N && i + 1 < aminoAcidPolymer.Length && aminoAcidPolymer[i + 1] == c))
                         {
-                            if((CleavageTerminus != Terminus.N && i + 1 < aminoAcidPolymer.Length && aminoAcidPolymer[i + 1] == nc) 
-                                || (CleavageTerminus == Terminus.N && i - 1 >= 0 && aminoAcidPolymer[i - 1] == nc))
+                            bool cleave = true;
+                            foreach (char nc in AminoAcidsPreventingCleavage)
                             {
-                                cleave = false;
-                                break;
+                                if ((CleavageTerminus != Terminus.N && i + 1 < aminoAcidPolymer.Length && aminoAcidPolymer[i + 1] == nc)
+                                    || (CleavageTerminus == Terminus.N && i - 1 >= 0 && aminoAcidPolymer[i - 1] == nc))
+                                {
+                                    cleave = false;
+                                    break;
+                                }
                             }
-                        }
-                        if(cleave)
-                        {
-                            indices.Add(i);
+                            if (cleave)
+                            {
+                                indices.Add(i);
+                            }
                         }
                     }
                 }

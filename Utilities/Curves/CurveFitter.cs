@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MathNet.Numerics;
-using MathNet.Numerics.LinearAlgebra.Generic;
+//using MathNet.Numerics.LinearAlgebra.Generic;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using MathNet.Numerics.LinearAlgebra.Double.Factorization;
@@ -94,7 +94,8 @@ namespace PeptidAce.Utilities
 
             try
             {
-            MathNet.Numerics.Interpolation.IInterpolation interpole = new MathNet.Numerics.Interpolation.Algorithms.AkimaSplineInterpolation(xTime, yIntensity);
+                //interpole = MathNet.Numerics.Interpolation.LinearSpline.Interpolate(time, intensityCount);
+                MathNet.Numerics.Interpolation.IInterpolation interpole = MathNet.Numerics.Interpolation.LinearSpline.Interpolate(xTime, yIntensity);//Algorithms.AkimaSplineInterpolation
             //MathNet.Numerics.Interpolation.IInterpolation interpole = new MathNet.Numerics.Interpolation.Algorithms.CubicSplineInterpolation(xTime, yIntensity);
             double maxTime = 0;
             for (int i = 0; i < xTime.Count; i++)

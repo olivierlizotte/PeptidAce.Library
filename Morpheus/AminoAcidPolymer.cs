@@ -240,7 +240,11 @@ namespace PeptidAce
         }
         protected AminoAcidPolymer(string baseSequence)
         {
-            BaseSequence = INVALID_AMINO_ACIDS.Replace(baseSequence, string.Empty);
+            string[] seqSplits = baseSequence.Split(new char[]{ '(', ')' });            
+            string seq = "";
+            for (int i = 0; i < seqSplits.Length; i += 2)
+                seq += seqSplits[i];
+            BaseSequence = INVALID_AMINO_ACIDS.Replace(seq, string.Empty);
         }
 
         public override string ToString()
@@ -306,6 +310,15 @@ namespace PeptidAce
         public Dictionary<int, Modification> VariableModifications
         {
             get { return variableModifications; }
+        }
+
+        public bool IsPionylated()
+        {
+            if (variableModifications != null)
+                foreach (Modification mod in variableModifications.Values)
+                    if (mod == ModificationDictionary.Pionylation)
+                        return true;
+            return false;
         }
 
         public void SetVariableModifications(Dictionary<int, Modification> value)

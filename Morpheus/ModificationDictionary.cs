@@ -72,9 +72,12 @@ namespace PeptidAce
             get { return instance; }
         }
 
+        public static Modification Pionylation;
         private void Add(Modification modification)
         {
             Add(modification.Description, modification);
+            if (modification.Description.Contains("Pionylation"))
+                Pionylation = modification;
         }
     }
 }
