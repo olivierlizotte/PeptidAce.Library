@@ -21,7 +21,7 @@ namespace PeptidAce
         }
 
         public Protein(string sequence, string description, bool decoy)
-            : base(sequence)
+            : base(sequence, true)
         {
             this.Description = description;
             this.Decoy = decoy;// Description.Contains("DECOY");
@@ -141,7 +141,7 @@ namespace PeptidAce
             }
 
             int variable_modification_isoforms = 0;
-            foreach(Dictionary<int, Modification> kvp in GetVariableModificationPatterns(possible_modifications))
+            foreach(Dictionary<int, Modification> kvp in GetVariableModificationPatterns(possible_modifications, maximumVariableModificationIsoforms))
             {
                 Protein protein = new Protein(BaseSequence, Description, Decoy);
                 protein.SetFixedModifications(FixedModifications);

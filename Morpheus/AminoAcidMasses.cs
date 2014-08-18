@@ -8,6 +8,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace PeptidAce
 {
@@ -16,6 +17,7 @@ namespace PeptidAce
         private static readonly double[] MONOISOTOPIC_AMINO_ACID_MASSES = new double['Z' - 'A' + 1];
         private static readonly double[] AVERAGE_AMINO_ACID_MASSES = new double['Z' - 'A' + 1];
         public static char[] AMINO_ACIDS = new char[0];
+        public static char[] VALID_AMINO_ACIDS = new char[0];
 
         static AminoAcidMasses()
         {
@@ -39,6 +41,11 @@ namespace PeptidAce
                         aminoAcids.Add(one_letter_code);
                     }
                 }
+                MONOISOTOPIC_AMINO_ACID_MASSES['X' - 'A'] = 0.0;
+                AVERAGE_AMINO_ACID_MASSES['X' - 'A'] = 0.0;
+                VALID_AMINO_ACIDS = aminoAcids.ToArray();
+
+                //aminoAcids.Add('X'); 
                 AMINO_ACIDS = aminoAcids.ToArray();
             }
             catch (Exception) 
@@ -47,6 +54,7 @@ namespace PeptidAce
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double GetMonoisotopicMass(char aminoAcid)
         {
             return MONOISOTOPIC_AMINO_ACID_MASSES[aminoAcid - 'A'];
@@ -55,6 +63,40 @@ namespace PeptidAce
         public static double GetAverageMass(char aminoAcid)
         {
             return AVERAGE_AMINO_ACID_MASSES[aminoAcid - 'A'];
+        }
+
+        public static double GetHichestMass(int maxPeptideLength)
+        {
+            double maxMass = 0.0;
+            foreach (double mass in MONOISOTOPIC_AMINO_ACID_MASSES)
+                if (mass > maxMass)
+                    maxMass = mass;
+            return maxMass * maxPeptideLength;
+        }
+
+        public static double GetLowestMass(int minPeptideLength)
+        {
+            double minMass = double.MaxValue;
+            foreach (double mass in MONOISOTOPIC_AMINO_ACID_MASSES)
+                if (mass > 0.0 && mass < minMass)
+                    minMass = mass;
+            return minMass * minPeptideLength;
+        }
+
+        public static double GetMass(string sequence)
+        {
+            double cumul = PeptidAce.Utilities.Constants.WATER_MONOISOTOPIC_MASS;
+            foreach (char c in sequence)
+                cumul += AminoAcidMasses.GetMonoisotopicMass(c);
+            return cumul;
+        }
+
+        public static double GetMass(IList<char> sequence)
+        {
+            double cumul = PeptidAce.Utilities.Constants.WATER_MONOISOTOPIC_MASS;
+            foreach(char c in sequence)
+                cumul += AminoAcidMasses.GetMonoisotopicMass(c);
+            return cumul;
         }
     }
 }

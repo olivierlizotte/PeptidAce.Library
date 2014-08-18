@@ -19,11 +19,14 @@ namespace PeptidAce
     /// </summary>
     public class Ace
     {
-        public static Result Start(DBOptions dbOptions, Samples project, bool loadMS1 = true, bool filterMS2 = true)
+        public static Result Start(DBOptions dbOptions, Samples project, bool loadMS1 = true, bool filterMS2 = true, Queries queries = null)
         {
             Ace pAce = new Ace(dbOptions, project);
             pAce.Preload(loadMS1, filterMS2);
-            pAce.PrepareQueries();
+            if (queries == null)
+                pAce.PrepareQueries();
+            else
+                pAce.AllQueries = queries;
 
             if(pAce.AllQueries.Count > 0)
                 return pAce.LaunchSearch(pAce.AllQueries);
@@ -51,7 +54,7 @@ namespace PeptidAce
         /// </summary>
         public void Preload(bool loadMS1, bool filterMS2 = true)
         {
-            AllProteins             = ReadProteomeFromFasta(dbOptions.FastaDatabaseFilepath, !dbOptions.DecoyFusion, dbOptions);
+            AllProteins             = ReadProteomeFromFasta(dbOptions.FastaDatabaseFilepath, !dbOptions.DecoyFusion);
             AllSpectras             = LoadSpectras(loadMS1, filterMS2);
         }
 
@@ -62,7 +65,7 @@ namespace PeptidAce
         /// </summary>
         public void PrepareQueries()
         {
-            AllQueries = CreateQueries(AllSpectras);
+            AllQueries = CreateQueries(AllSpectras, dbOptions);
         }
 
         /// <summary>
@@ -72,7 +75,7 @@ namespace PeptidAce
         /// <param name="tmp"></param>
         public void Load(Result tmp)
         {
-            AllProteins = ReadProteomeFromFasta(dbOptions.FastaDatabaseFilepath, !dbOptions.DecoyFusion, dbOptions);
+            AllProteins = ReadProteomeFromFasta(dbOptions.FastaDatabaseFilepath, !dbOptions.DecoyFusion);
             AllQueries = tmp.queries;
             
             AllSpectras = new Dictionary<Sample, Spectra>();
@@ -89,12 +92,12 @@ namespace PeptidAce
         /// <param name="fileName"></param>
         /// <param name="onTheFlyDecoys"> Adds reverse sequnce proteins </param>
         /// <returns></returns>
-        public static List<Protein> ReadProteomeFromFasta(string fileName, bool addReverseProteins, DBOptions dbOptions)
+        public static List<Protein> ReadProteomeFromFasta(string fileName, bool addReverseProteins)
         {
             List<Protein> AllProteins = new List<Protein>();
             try
             {
-                dbOptions.ConSole.WriteLine("Reading FASTA file " + fileName + " ... ");
+                //dbOptions.ConSole.WriteLine("Reading FASTA file " + fileName + " ... ");
                 //Extract Proteins from Fasta file
                 FileStream protein_fasta_database = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
                 foreach (Protein protein in ProteinFastaReader.ReadProteins(protein_fasta_database, addReverseProteins))
@@ -103,11 +106,11 @@ namespace PeptidAce
                 }
                 //AllProteins.Sort(Protein.TargetDecoyComparison);
                 protein_fasta_database.Close();
-                dbOptions.ConSole.WriteLine("Proteins in fasta file : " + AllProteins.Count);
+                //dbOptions.ConSole.WriteLine("Proteins in fasta file : " + AllProteins.Count);
             }
             catch(Exception e)
             {
-                dbOptions.ConSole.WriteLine("Error reading fasta file : " + fileName);
+                //dbOptions.ConSole.WriteLine("Error reading fasta file : " + fileName);
                 Console.WriteLine(e.StackTrace);
             }
             return AllProteins;
@@ -175,7 +178,7 @@ namespace PeptidAce
         /// </summary>
         /// <param name="spectras"></param>
         /// <returns></returns>
-        public Queries CreateQueries(Dictionary<Sample, Spectra> spectras)
+        public static Queries CreateQueries(Dictionary<Sample, Spectra> spectras, DBOptions dbOptions)
         {
             Queries AllQueries = new Queries(dbOptions);
             foreach(Sample entry in spectras.Keys)
@@ -204,7 +207,7 @@ namespace PeptidAce
             else
                 result.SetPrecursors(dbSearcher.Search(queries, ps.DigestProteomeOnTheFly(AllProteins, false, queries)));
             dbOptions.ConSole.WriteLine(result.precursors.Count + " precursors matched !");
-                        
+            
             foreach (Precursor precursor in result.precursors)
                 foreach (PeptideSpectrumMatch psm in precursor.psms_AllPossibilities)
                         precursor.psms.Add(psm);

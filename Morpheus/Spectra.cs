@@ -25,14 +25,12 @@ namespace PeptidAce
         public double MinRt;
 
         private const bool HARMONIC_CHARGE_DETECTION = false;
-        public int NbScans;
 
         public Tracks tracks;
         public List<MS1Spectrum> MS1s;
 
-        public Spectra(int nbScans = -1) : base() 
+        public Spectra() : base() 
         {
-            this.NbScans = nbScans;
             MaxMZ = double.MinValue;
             MinMZ = double.MaxValue;
             MaxProductMass = double.MinValue;
@@ -120,7 +118,7 @@ namespace PeptidAce
             //Find file name in msFile;
             string mzMlFilepath = filePath;
             int num_spectra = msFile.run.spectrumList.size();
-            Spectra spectra = new Spectra(num_spectra);
+            Spectra spectra = new Spectra();
             //List<Trail> trails = new List<Trail>();       
             MS1Spectrum previousMS1 = null;
             try
@@ -168,7 +166,7 @@ namespace PeptidAce
                                 if (isolationWindow <= 0)
                                     isolationWindow = 2;
                             }
-
+                            
                             foreach (pwiz.CLI.msdata.SelectedIon ion in precursor.selectedIons)
                             {
                                 //Cycle through MS to get real precursor intensities
@@ -217,7 +215,7 @@ namespace PeptidAce
                         {
                             //peaks = AssignChargeStates(peaks, options.maximumAssumedPrecursorChargeState, options.precursorMassTolerance);
                             //peaks = Deisotopebkp(peaks, options.maximumAssumedPrecursorChargeState, options.precursorMassTolerance);
-                            peaks = AssignChargeStatesAndDeisotope(peaks, options.MaximumPrecursorChargeState, new MassTolerance(options.productMassTolerance.Value * 0.5, options.productMassTolerance.Units));
+                            peaks = AssignChargeStatesAndDeisotope(peaks, options.MaximumPrecursorChargeState, new MassTolerance(options.productMassTolerance.Value * 0.25, options.productMassTolerance.Units));
                             peaks = FilterPeaks(peaks, options.MaximumNumberOfFragmentsPerSpectrum);
 
                             //TODO Add Contaminant removal 

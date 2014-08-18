@@ -9,6 +9,11 @@ namespace PeptidAce
 {
     public class MsMsPeak
     {
+        public static int Comparer(MsMsPeak p1, MsMsPeak p2)
+        {
+            return p1.MZ.CompareTo(p2.MZ);
+        }
+
         private double _MZ;
         public double MZ { 
             get{ return _MZ; }  

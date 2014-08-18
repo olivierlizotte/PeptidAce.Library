@@ -5,6 +5,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace PeptidAce.Utilities
 {
@@ -59,14 +60,21 @@ namespace PeptidAce.Utilities
             return (int)Math.Round(mass / mz);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double MZFromMass(double mass, int charge)
         {
-            return (mass + charge * Constants.PROTON_MASS) / Math.Abs(charge);
+            return (mass + charge * Constants.PROTON_MASS) / (double) Math.Abs(charge);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double MZFromMassShift(double mass, int charge)
+        {
+            return mass / (double)Math.Abs(charge);
         }
 
         public static double MZFromMzSingleCharge(double mz, int charge)
         {
-            return (mz + (charge - 1) * Constants.PROTON_MASS) / Math.Abs(charge);
+            return (mz + (charge - 1) * Constants.PROTON_MASS) / (double)Math.Abs(charge);
         }
 
         public static double IsotopicMassShift(int nbIsotope, int charge)
@@ -88,6 +96,14 @@ namespace PeptidAce.Utilities
             {
                 return double.NaN;
             }
+        }
+
+        public static double CalculateTolerance(double experimental, MassTolerance tolerance)
+        {
+            if (tolerance.Units == MassToleranceUnits.Da)
+                return tolerance.Value;
+            else
+                return ((MassTolerance.MzTop(experimental, tolerance) - experimental) / experimental) * 1e6;
         }
         
         public static double MzDifference(double mz1, double mz2, MassToleranceUnits tol)

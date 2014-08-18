@@ -18,9 +18,11 @@ namespace PeptidAce
     /// </summary>
     public class DBOptions
     {
-        public int MinimumPrecursorChargeState;
-        public int MaximumPrecursorChargeState;
-        public int MaximumNumberOfFragmentsPerSpectrum;
+        public string DBName;
+
+        public int MinimumPrecursorChargeState = 1;
+        public int MaximumPrecursorChargeState = 8;
+        public int MaximumNumberOfFragmentsPerSpectrum = 100;
         public string FastaDatabaseFilepath;
         public double MaximumPeptideMass;
         public bool DecoyFusion;
@@ -30,7 +32,7 @@ namespace PeptidAce
 
         public double PSMFalseDiscoveryRate = 0.05;
 
-        public int NbPSMToKeep = 32;
+        public int NbPSMToKeep = 8;
         public string OutputFolder;
         public double MinimumPSMScore;
         public int MinimumPeptideLength = 5;
@@ -65,13 +67,18 @@ namespace PeptidAce
         public double dPeptideScore = 0.3;
         public double dFragmentScore = 0.0;
 
+        public Dictionary<string, double> dicOfMinPrecursorThr;
+        public Dictionary<string, double> dicOfMaxPrecursorThr;
+        public Dictionary<string, double> dicOfMinFragmentThr;
+        public Dictionary<string, double> dicOfMaxFragmentThr;
+
         ///Values kept from the original Morpheus source code
         public InitiatorMethionineBehavior initiatorMethionineBehavior;
         public List<Modification> fixedModifications;
         public List<Modification> variableModifications;
         public int maximumVariableModificationIsoforms;
-        public MassTolerance precursorMassTolerance;
-        public MassTolerance productMassTolerance;
+        public MassTolerance precursorMassTolerance = new MassTolerance(0.005, MassToleranceUnits.Da);
+        public MassTolerance productMassTolerance = new MassTolerance(0.005, MassToleranceUnits.Da);
 
         public IConSol ConSole;
         /// <summary>
@@ -111,9 +118,9 @@ namespace PeptidAce
             this.MaximumPrecursorChargeState = 4;
             this.MaximumNumberOfFragmentsPerSpectrum = 400;
             //TODO Add precision to the precursor by reading MS part of file
-            this.precursorMassTolerance = new MassTolerance(0.005, MassToleranceUnits.Da);//2.1
+            this.precursorMassTolerance = new MassTolerance(0.05, MassToleranceUnits.Da);//2.1
             //TODO Add precision to the product masses by reading corresponding MS part of raw file
-            this.productMassTolerance = new MassTolerance(0.005, MassToleranceUnits.Da);
+            this.productMassTolerance = new MassTolerance(0.05, MassToleranceUnits.Da);
 
             this.PSMFalseDiscoveryRate = 0.25;// 0.05;
 
@@ -157,15 +164,15 @@ namespace PeptidAce
         {
             Random r = new Random();
 
-            dProduct = r.NextDouble();
-            dPrecursor = r.NextDouble();
-            dMatchingProductFraction = r.NextDouble();
-            dMatchingProduct = 0;// r.NextDouble();
-            dIntensityFraction = r.NextDouble();
-            dIntensity = 0;// r.NextDouble() * 0.0001;
-            dProtein = r.NextDouble();
-            dPeptideScore = r.NextDouble();
-            dFragmentScore = r.NextDouble();
+            dProduct = r.NextDouble() - 0.5;
+            dPrecursor = r.NextDouble() - 0.5;
+            dMatchingProductFraction = r.NextDouble() - 0.5;
+            dMatchingProduct = (r.NextDouble() - 0.5) * 0.01;
+            dIntensityFraction = r.NextDouble() - 0.5;
+            dIntensity = (r.NextDouble() - 0.5) * 0.0001;
+            dProtein = r.NextDouble() - 0.5;
+            dPeptideScore = r.NextDouble() - 0.5;
+            dFragmentScore = r.NextDouble() - 0.5;
         }
 
         public void Save(string fileName)

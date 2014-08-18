@@ -162,32 +162,64 @@ namespace PeptidAce
     /// </summary>
     public class FullFragments
     {
-        List<FragmentGen> fragments;
+        public static Dictionary<string, FragmentGen> AllFragments = null;
+        public List<FragmentGen> fragments;
+        public FullFragments(IEnumerable<FragmentGen> frags)
+        {
+            fragments = new List<FragmentGen>();
+            foreach (FragmentGen fg in frags)
+                fragments.Add(fg);
+        }
+
         public FullFragments(bool bNyOnly = false, bool includeLosses = false)
         {
-            List<FragmentGen> mainFrags = new List<FragmentGen>();
+            if(AllFragments == null)
+            {
+                AllFragments = new Dictionary<string, FragmentGen>();
 
-            mainFrags.Add(new FragmentGen("B", false, 0));
-            mainFrags.Add(new FragmentGen("Y", true, Constants.WATER_MONOISOTOPIC_MASS));
+                AllFragments.Add("b", new FragmentGen("B", false, 0));
+                AllFragments.Add("y", new FragmentGen("Y", true, Constants.WATER_MONOISOTOPIC_MASS));
+                
+                AllFragments.Add("a", new FragmentGen("A", false, -29.002741 + Constants.PROTON_MASS));
+                AllFragments.Add("c", new FragmentGen("C", false, 17.02654915));
+                AllFragments.Add("x", new FragmentGen("X", true, 43.9898346942));
+                AllFragments.Add("z", new FragmentGen("Z", true, 1.991840552567 - Constants.HYDROGEN_MASS));                
+
+                foreach (string fg in AllFragments.Keys.ToArray())
+                {
+                    //Water Loss
+                    AllFragments.Add(fg + "-H2O", new FragmentGen(AllFragments[fg].Name + "h2oLoss", AllFragments[fg].IsReverse, AllFragments[fg].addOn - Constants.WATER_MONOISOTOPIC_MASS));
+                    //Amonia Loss
+                    AllFragments.Add(fg + "-A", new FragmentGen(AllFragments[fg].Name + "amoniaLoss", AllFragments[fg].IsReverse, AllFragments[fg].addOn - Constants.AMONIA_MASS));                    
+                }
+            }
+            fragments = new List<FragmentGen>();
+            fragments.Add(AllFragments["b"]);
+            fragments.Add(AllFragments["y"]);
+            if(includeLosses)
+            {
+                fragments.Add(AllFragments["b-H2O"]);
+                fragments.Add(AllFragments["y-H2O"]);
+                fragments.Add(AllFragments["b-A"]);
+                fragments.Add(AllFragments["y-A"]);
+            }
 
             if (!bNyOnly)
             {
-                mainFrags.Add(new FragmentGen("A", false, -29.002741 + Constants.PROTON_MASS));
-                mainFrags.Add(new FragmentGen("C", false, 17.02654915));
-                mainFrags.Add(new FragmentGen("X", true, 43.9898346942));
-                mainFrags.Add(new FragmentGen("Z", true, 1.991840552567));
-            }
-
-            fragments = new List<FragmentGen>();
-            foreach (FragmentGen fg in mainFrags)
-            {
-                fragments.Add(fg);
-                if (includeLosses)
+                fragments.Add(AllFragments["a"]);
+                fragments.Add(AllFragments["c"]);
+                fragments.Add(AllFragments["x"]);
+                fragments.Add(AllFragments["z"]);
+                if(includeLosses)
                 {
-                    //Water Loss
-                    fragments.Add(new FragmentGen(fg.Name + "h2oLoss", fg.IsReverse, fg.addOn - Constants.WATER_MONOISOTOPIC_MASS));
-                    //Amonia Loss
-                    fragments.Add(new FragmentGen(fg.Name + "amoniaLoss", fg.IsReverse, fg.addOn - Constants.AMONIA_MASS));
+                    fragments.Add(AllFragments["a-H2O"]);
+                    fragments.Add(AllFragments["c-H2O"]);
+                    fragments.Add(AllFragments["x-H2O"]);
+                    fragments.Add(AllFragments["z-H2O"]);
+                    fragments.Add(AllFragments["a-A"]);
+                    fragments.Add(AllFragments["c-A"]);
+                    fragments.Add(AllFragments["x-A"]);
+                    fragments.Add(AllFragments["z-A"]);
                 }
             }
         }
@@ -238,6 +270,49 @@ namespace PeptidAce
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Iteratively returns all theoretical fragment masses from a given array of masses (list of Amino Acid mass + modification for each)
+        /// </summary>
+        /// <param name="masses"></param>
+        /// <param name="precursorKnownCharge"></param>
+        /// <returns></returns>
+        public SortedList<double, int> ComputeFragmentFast(double[] masses, int precursorKnownCharge)
+        {
+            SortedList<double, int> result = new SortedList<double, int>(fragments.Count * masses.Length);
+            int maxCharge = precursorKnownCharge;
+            if (precursorKnownCharge > 1)
+                maxCharge = precursorKnownCharge - 1;
+            else
+                maxCharge = 1;
+
+            double cumulN = 0.0;
+            double cumulC = 0.0;
+            for (int r = 0; r < masses.Length; r++)
+            {
+                cumulN += masses[r];
+                cumulC += masses[masses.Length - r - 1];
+
+                foreach (FragmentGen fragment in fragments)
+                {
+                    double product_mass;
+                    if (fragment.IsReverse)
+                        product_mass = cumulC + fragment.addOn;
+                    else
+                        product_mass = cumulN + fragment.addOn;
+                    
+                    for (int c = maxCharge; c > 0; c--)
+                    {
+                        double mz = Numerics.MZFromMass(product_mass, c);
+                        if (!result.ContainsKey(mz))
+                            result.Add(mz, c);
+                        else
+                            result[mz] = 0;
+                    }
+                }
+            }
+            return result;
         }
     }
     /*

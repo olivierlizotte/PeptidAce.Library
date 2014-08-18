@@ -13,12 +13,13 @@ namespace PeptidAce
         public string Sequence;
         public List<string> Proteins;
     }
-
+    
     /// <summary>
     /// Peptide class, mostly as its defined in Morpheus, with a few twists
     /// </summary>
     public class Peptide : AminoAcidPolymer
     {
+
         public Protein Parent { get; set; }
 
         public int StartResidueNumber { get; set; }
@@ -100,8 +101,42 @@ namespace PeptidAce
             return new Peptide(Parent, EndResidueNumber-1, StartResidueNumber-1, MissedCleavages);
         }
 
+        public Peptide(string sequence, bool decoy)
+            : base(sequence, true)
+        {
+            StartResidueNumber = 1;
+            EndResidueNumber = Length;
+            MissedCleavages = 0;
+            this.Decoy = decoy;
+            NextAminoAcid = '-';
+            PreviousAminoAcid = '-';
+        }
+
+        public Peptide(string sequence)
+            : base(sequence, true)
+        {
+            StartResidueNumber = 1;
+            EndResidueNumber = Length;
+            MissedCleavages = 0;
+            this.Decoy = false;
+            NextAminoAcid = '-';
+            PreviousAminoAcid = '-';
+        }
+
+        public Peptide(string sequence, Dictionary<int, Modification> mods)
+            : base(sequence, true)
+        {
+            StartResidueNumber = 1;
+            EndResidueNumber = Length;
+            MissedCleavages = 0;
+            this.Decoy = false;
+            NextAminoAcid = '-';
+            PreviousAminoAcid = '-';
+            SetVariableModifications(mods);
+        }
+
         public Peptide(Protein parent, int startResidueNumber, int endResidueNumber, int missedCleavages)
-            : base(GetSequence(parent.BaseSequence, startResidueNumber, endResidueNumber))
+            : base(GetSequence(parent.BaseSequence, startResidueNumber, endResidueNumber), true)
         {
             Parent = parent;
             Decoy = parent.Decoy;
@@ -154,7 +189,20 @@ namespace PeptidAce
             return array;
         }
 
-        private Peptide(Peptide peptide) : this(peptide.Parent, peptide.StartResidueNumber-1, peptide.EndResidueNumber-1, peptide.MissedCleavages) { }
+        private Peptide(Peptide peptide)
+            : base()
+        {            
+            StartResidueNumber = peptide.StartResidueNumber;
+            EndResidueNumber = peptide.EndResidueNumber;
+            MissedCleavages = peptide.MissedCleavages;
+            this.Decoy = peptide.Decoy;
+            NextAminoAcid = peptide.NextAminoAcid;
+            PreviousAminoAcid = peptide.PreviousAminoAcid;
+            Parent = peptide.Parent;
+            BaseSequence = peptide.BaseSequence;
+            _preCompSeq = peptide._preCompSeq;
+            fixedModifications = peptide.fixedModifications;
+        }
 
         public IEnumerable<Peptide> GetVariablyModifiedPeptides(IEnumerable<Modification> variableModifications, int maximumVariableModificationIsoforms)
         {
@@ -241,18 +289,18 @@ namespace PeptidAce
                 }
             }
 
-            int variable_modification_isoforms = 0;
-            foreach(Dictionary<int, Modification> kvp in GetVariableModificationPatterns(possible_modifications))
+            //int variable_modification_isoforms = 0;
+            foreach (Dictionary<int, Modification> kvp in GetVariableModificationPatterns(possible_modifications, maximumVariableModificationIsoforms))
             {
                 Peptide peptide = new Peptide(this);
-                peptide.SetFixedModifications(FixedModifications);
+                //peptide.SetFixedModifications(FixedModifications);
                 peptide.SetVariableModifications(kvp);
                 yield return peptide;
-                variable_modification_isoforms++;
-                if(variable_modification_isoforms >= maximumVariableModificationIsoforms)
-                {
-                    yield break;
-                }
+                //variable_modification_isoforms++;
+                //if(variable_modification_isoforms >= maximumVariableModificationIsoforms)
+                //{
+                //    yield break;
+                //}
             }
         }
 

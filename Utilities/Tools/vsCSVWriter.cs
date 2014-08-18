@@ -61,7 +61,7 @@ namespace PeptidAce.Utilities
         
         public bool WriteToFile()
         {
-            int fileTries = 2;
+            int fileTries = 20;
             while (fileTries > 0)
             {
                 try

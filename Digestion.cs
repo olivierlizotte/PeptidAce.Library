@@ -23,6 +23,14 @@ namespace PeptidAce
             this.options = dbOptions;
         }
 
+        public static double[] GetMasses(char[] sequence)
+        {
+            double[] proteinMasses = new double[sequence.Length];
+            for (int i = 0; i < sequence.Length; i++)
+                proteinMasses[i] = AminoAcidMasses.GetMonoisotopicMass(sequence[i]);
+            return proteinMasses;
+        }
+
         public static double[] GetMasses(string sequence)
         {
             double[] proteinMasses = new double[sequence.Length];

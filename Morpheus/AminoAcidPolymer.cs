@@ -97,7 +97,7 @@ namespace PeptidAce
             get { return baseSequence.Replace('I', 'L'); }
         }
 
-        private string _preCompSeq = null;
+        protected string _preCompSeq = null;
         public string Sequence
         {
             get
@@ -238,13 +238,18 @@ namespace PeptidAce
             variableModifications = new Dictionary<int, Modification>();
             fixedModifications = new Dictionary<int, List<Modification>>();
         }
-        protected AminoAcidPolymer(string baseSequence)
-        {
+        protected AminoAcidPolymer(string baseSequence, bool checkMods)
+        {            
             string[] seqSplits = baseSequence.Split(new char[]{ '(', ')' });            
             string seq = "";
             for (int i = 0; i < seqSplits.Length; i += 2)
                 seq += seqSplits[i];
             BaseSequence = INVALID_AMINO_ACIDS.Replace(seq, string.Empty);
+        }
+
+        protected AminoAcidPolymer(string baseSequence)
+        {
+            BaseSequence = baseSequence;
         }
 
         public override string ToString()
@@ -254,7 +259,7 @@ namespace PeptidAce
         
         private bool initializeProductArrays = true;
 
-        private Dictionary<int, List<Modification>> fixedModifications;
+        protected Dictionary<int, List<Modification>> fixedModifications;
 
         public Dictionary<int, List<Modification>> FixedModifications
         {
@@ -314,16 +319,12 @@ namespace PeptidAce
 
         public bool IsPionylated()
         {
-            if (variableModifications != null)
-                foreach (Modification mod in variableModifications.Values)
-                    if (mod == ModificationDictionary.Pionylation)
-                        return true;
-            return false;
+            return (variableModifications != null && variableModifications.ContainsValue(ModificationDictionary.Pionylation));
         }
 
         public void SetVariableModifications(Dictionary<int, Modification> value)
         {
-            variableModifications = value;
+            variableModifications = new Dictionary<int,Modification>(value);
             initializeProductArrays = true;        
         }
         private static string StringifyMods(Dictionary<int, Modification> mods)
@@ -653,35 +654,75 @@ namespace PeptidAce
                     return null;
             }
         }
-        
-        protected IEnumerable<Dictionary<int, Modification>> GetVariableModificationPatterns(Dictionary<int, List<Modification>> possibleVariableModifications)
+
+        protected IEnumerable<Dictionary<int, Modification>> GetModificationDic(Dictionary<int, List<Modification>> possibleMods, int maxModPerPeptide, Dictionary<int, Modification> dic)
         {
-            if(possibleVariableModifications.Count == 0)
+            if (dic.Count < maxModPerPeptide)
             {
-                yield return null;
-            }
-            else
-            {
-                List<KeyValuePair<int, List<Modification>>> possible_variable_modifications = new List<KeyValuePair<int, List<Modification>>>(possibleVariableModifications);
-                int[] base_variable_modification_pattern = new int[Length + 4];
-                for(int variable_modifications = 0; variable_modifications <= possible_variable_modifications.Count; variable_modifications++)
+                foreach (int key in possibleMods.Keys)
                 {
-                    foreach(int[] variable_modification_pattern in GetVariableModificationPatterns(possible_variable_modifications, possible_variable_modifications.Count - variable_modifications, base_variable_modification_pattern, 0))
+                    if(!dic.ContainsKey(key))
                     {
-                        yield return GetVariableModificationPattern(variable_modification_pattern, possibleVariableModifications);
+                        List<Modification> list = possibleMods[key];
+                        for (int i = 0; i < list.Count; i++)
+                        {
+                            dic.Add(key, list[i]);
+                            yield return dic;
+                            foreach (Dictionary<int, Modification> otherDic in GetModificationDic(possibleMods, maxModPerPeptide, dic))
+                                yield return otherDic;
+                            dic.Remove(key);
+                        }
                     }
                 }
             }
         }
 
-        private static IEnumerable<int[]> GetVariableModificationPatterns(List<KeyValuePair<int, List<Modification>>> possibleVariableModifications, int unmodifiedResiduesDesired, int[] variableModificationPattern, int index)
+        protected IEnumerable<Dictionary<int, Modification>> GetVariableModificationPatterns(Dictionary<int, List<Modification>> possibleVariableModifications, int maxModPerPeptide)
         {
-            if(index < possibleVariableModifications.Count - 1)
+            if(possibleVariableModifications.Count > 0 && maxModPerPeptide > 0)
+            {
+                foreach (Dictionary<int, Modification> dic in GetModificationDic(possibleVariableModifications, maxModPerPeptide, new Dictionary<int, Modification>()))
+                    yield return dic;
+                
+                //List<KeyValuePair<int, List<Modification>>> possible_variable_modifications = new List<KeyValuePair<int, List<Modification>>>(possibleVariableModifications);
+                //int[] base_variable_modification_pattern = new int[Length + 4];
+                //for (int variable_modifications = 0; variable_modifications <= possibleVariableModifications.Count; variable_modifications++)
+                //{
+                //    foreach (int[] variable_modification_pattern in GetVariableModificationPatterns(possibleVariableModifications, possibleVariableModifications.Count - variable_modifications, base_variable_modification_pattern, 0, maxModPerPeptide))
+                //    {
+                   //     Dictionary<int, Modification> dic = GetVariableModificationPattern(variable_modification_pattern, possibleVariableModifications);
+                     //   if (dic.Count > 0)
+                       //     yield return dic;
+                //    }
+                //}
+            }
+        }
+        /*
+        protected IEnumerable<Dictionary<int, Modification>> GetVariableModificationPatterns(Dictionary<int, List<Modification>> possibleVariableModifications, int maxModPerPeptide)
+        {
+            if(possibleVariableModifications.Count > 0)
+            {
+                List<KeyValuePair<int, List<Modification>>> possible_variable_modifications = new List<KeyValuePair<int, List<Modification>>>(possibleVariableModifications);
+                int[] base_variable_modification_pattern = new int[Length + 4];
+                for(int variable_modifications = 0; variable_modifications <= possible_variable_modifications.Count; variable_modifications++)
+                {
+                    foreach (int[] variable_modification_pattern in GetVariableModificationPatterns(possible_variable_modifications, possible_variable_modifications.Count - variable_modifications, base_variable_modification_pattern, 0, maxModPerPeptide))
+                    {
+                        Dictionary<int, Modification> dic = GetVariableModificationPattern(variable_modification_pattern, possibleVariableModifications);
+                        if (dic.Count > 0)
+                            yield return dic;
+                    }
+                }
+            }
+        }//*/
+        private static IEnumerable<int[]> GetVariableModificationPatterns(List<KeyValuePair<int, List<Modification>>> possibleVariableModifications, int unmodifiedResiduesDesired, int[] variableModificationPattern, int index, int maxModPerPeptide)
+        {
+            if (index < possibleVariableModifications.Count - 1 && index < maxModPerPeptide)
             {
                 if(unmodifiedResiduesDesired > 0)
                 {
                     variableModificationPattern[possibleVariableModifications[index].Key] = 0;
-                    foreach(int[] new_variable_modification_pattern in GetVariableModificationPatterns(possibleVariableModifications, unmodifiedResiduesDesired - 1, variableModificationPattern, index + 1))
+                    foreach (int[] new_variable_modification_pattern in GetVariableModificationPatterns(possibleVariableModifications, unmodifiedResiduesDesired - 1, variableModificationPattern, index + 1, maxModPerPeptide))
                     {
                         yield return new_variable_modification_pattern;
                     }
@@ -691,7 +732,7 @@ namespace PeptidAce
                     for(int i = 1; i <= possibleVariableModifications[index].Value.Count; i++)
                     {
                         variableModificationPattern[possibleVariableModifications[index].Key] = i;
-                        foreach(int[] new_variable_modification_pattern in GetVariableModificationPatterns(possibleVariableModifications, unmodifiedResiduesDesired, variableModificationPattern, index + 1))
+                        foreach (int[] new_variable_modification_pattern in GetVariableModificationPatterns(possibleVariableModifications, unmodifiedResiduesDesired, variableModificationPattern, index + 1, maxModPerPeptide))
                         {
                             yield return new_variable_modification_pattern;
                         }
