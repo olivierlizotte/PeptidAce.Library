@@ -98,6 +98,303 @@ namespace PeptidAce.Utilities
             }
         }
 
+        public static double CalculateHydrophobicity(string sequence)
+        {
+            int nbHydro = 0;
+            foreach(char c in sequence)
+            {
+                switch (c)
+                {
+                    case 'I':
+                    case 'L':
+                    case 'V':
+                    case 'M':
+                    case 'C':
+                    case 'A':
+                    case 'T':
+                    case 'F':
+                    case 'Y':
+                    case 'W':
+                    case 'H':
+                    case 'K':
+                        nbHydro++;
+                        break;
+                }
+            }
+            return nbHydro / (double)sequence.Length;
+        }
+
+        public static double CalculateAromaticity(string sequence)
+        {
+
+            int nbAroma = 0;
+            foreach (char c in sequence)
+            {
+                switch (c)
+                {
+                    case 'F':
+                    case 'Y':
+                    case 'W':
+                    case 'H':
+                        nbAroma++;
+                        break;
+                }
+            }
+            return nbAroma / (double)sequence.Length;
+        }
+
+        public static double CalculatePolarity(string sequence)
+        {
+
+            int nbPolar = 0;
+            foreach (char c in sequence)
+            {
+                switch (c)
+                {
+                    case 'C':
+                    case 'T':
+                    case 'S':
+                    case 'N':
+                    case 'Q':
+                    case 'D':
+                    case 'E':
+                    case 'H':
+                    case 'K':
+                    case 'R':
+                    case 'W':
+                    case 'Y':
+                        nbPolar++;
+                        break;
+                }
+            }
+            return nbPolar / (double)sequence.Length;
+        }
+
+        public static double CalculateSulfuricity(string sequence)
+        {
+            int nbSulfure = 0;
+            foreach (char c in sequence)
+            {
+                switch (c)
+                {
+                    case 'M':
+                    case 'C':
+                        nbSulfure++;
+                        break;
+                }
+            }
+            return nbSulfure / (double)sequence.Length;
+        }
+
+        public static double CalculateAliphaticity(string sequence)
+        {
+            int nbAli = 0;
+            foreach (char c in sequence)
+            {
+                switch (c)
+                {
+                    case 'I':
+                    case 'L':
+                    case 'V':
+                        nbAli++;
+                        break;
+                }
+            }
+            return nbAli / (double)sequence.Length;
+        }
+
+        public static double CalculateHydroxylicity(string sequence)
+        {
+            int nbHydroxyl= 0;
+            foreach (char c in sequence)
+            {
+                switch (c)
+                {
+                    case 'T':
+                    case 'S':
+                        nbHydroxyl++;
+                        break;
+                }
+            }
+            return nbHydroxyl / (double)sequence.Length;
+        }
+
+        public static int CalculateAcidity(string sequence)
+        {
+            int nbAcid = 0;
+            foreach (char c in sequence)
+            {
+                switch (c)
+                {
+                    case 'N':
+                    case 'Q':
+                        nbAcid++;
+                        break;
+                }
+            }
+            return nbAcid;
+        }
+
+        public static int CalculateBasic(string sequence)
+        {
+            int nbAcid = 0;
+            foreach (char c in sequence)
+            {
+                switch (c)
+                {
+                    case 'H':
+                    case 'K':
+                    case 'R':
+                        nbAcid++;
+                        break;
+                }
+            }
+            return nbAcid;
+        }
+
+        public static int CalculateNetCharge(string sequence)
+        {
+            int sum = 0;
+            foreach (char c in sequence)
+            {
+                switch (c)
+                {
+                    case 'D':
+                    case 'E':
+                        sum--;
+                        break;
+                    case 'R':
+                    case 'K':
+                    case 'H':
+                        sum++;
+                        break;
+                }
+            }
+            return sum;
+        }
+
+        public const char Asp = 'D';
+        public const char Glu = 'E';
+        public const char Cys = 'C';
+        public const char Tyr = 'Y';
+        public const char His = 'H';
+        public const char Lys = 'K';
+        public const char Arg = 'R';
+
+        public static double CalculateIsoElectricPoint(string sequence)
+        {
+            //Source:
+            //http://isoelectric.ovh.org/files/practise-isoelectric-point.html#mozTocId763352
+            int ProtLength = sequence.Length;
+
+            int AspNumber = 0;
+            int GluNumber = 0;
+            int CysNumber = 0;
+            int TyrNumber = 0;
+            int HisNumber = 0;
+            int LysNumber = 0;
+            int ArgNumber = 0;
+
+
+            foreach (char aa in sequence)//for (i = 0; i <= protein.length() - 1; ++i)              //  we are looking for charged amino acids
+            {
+                switch (aa)
+                {
+                    case 'D':
+                        ++AspNumber; break;
+                    case 'E':
+                        ++GluNumber; break;
+                    case 'C':
+                        ++CysNumber; break;
+                    case 'Y':
+                        ++TyrNumber; break;
+                    case 'H':
+                        ++HisNumber; break;
+                    case 'K':
+                        ++LysNumber; break;
+                    case 'R':
+                        ++ArgNumber; break;
+                }
+            }
+
+
+            double NQ = 0.0; //net charge in given pH
+
+            double QN1 = 0;  //C-terminal charge
+            double QN2 = 0;  //D charge
+            double QN3 = 0;  //E charge
+            double QN4 = 0;  //C charge
+            double QN5 = 0;  //Y charge
+            double QP1 = 0;  //H charge
+            double QP2 = 0;  //NH2 charge
+            double QP3 = 0;  //K charge
+            double QP4 = 0;  //R charge
+
+            double pH = 0.0;
+
+            //Normal, long method (about 650 iterations)
+            //if NQ <= 0, we succeedded
+            /*
+            for (pH = 0.0; NQ > 0 && pH < 14.0; pH += 0.01)
+            {
+                // we are using pK values form Wikipedia as they give quite good approximation
+                // if you want you can change it
+
+                QN1 = -1 / (1 + Math.Pow(10, (3.65 - pH)));
+                QN2 = -AspNumber / (1 + Math.Pow(10, (3.9 - pH)));
+                QN3 = -GluNumber / (1 + Math.Pow(10, (4.07 - pH)));
+                QN4 = -CysNumber / (1 + Math.Pow(10, (8.18 - pH)));
+                QN5 = -TyrNumber / (1 + Math.Pow(10, (10.46 - pH)));
+                QP1 = HisNumber / (1 + Math.Pow(10, (pH - 6.04)));
+                QP2 = 1 / (1 + Math.Pow(10, (pH - 8.2)));
+                QP3 = LysNumber / (1 + Math.Pow(10, (pH - 10.54)));
+                QP4 = ArgNumber / (1 + Math.Pow(10, (pH - 12.48)));
+
+                NQ = QN1 + QN2 + QN3 + QN4 + QN5 + QP1 + QP2 + QP3 + QP4;
+            }//*/
+
+            //Bisection method (about 12 iterations)
+            double E = 0.01;             //epsilon means precision [pI = pH ± E]
+            double pHprev = 0.0;         //of finding the solution
+            double pHnext = 14.0;        //0-14 is possible pH range
+            double temp = 0.0;
+
+            for (pH = 6.5; !((pH - pHprev < E) && (pHnext - pH < E)) && pH < 14.0; )
+            {
+                // we are using pK values form Wikipedia as they give quite good approximation
+                // if you want you can change it
+
+                QN1 = -1 / (1 + Math.Pow(10, (3.65 - pH)));
+                QN2 = -AspNumber / (1 + Math.Pow(10, (3.9 - pH)));
+                QN3 = -GluNumber / (1 + Math.Pow(10, (4.07 - pH)));
+                QN4 = -CysNumber / (1 + Math.Pow(10, (8.18 - pH)));
+                QN5 = -TyrNumber / (1 + Math.Pow(10, (10.46 - pH)));
+                QP1 = HisNumber / (1 + Math.Pow(10, (pH - 6.04)));
+                QP2 = 1 / (1 + Math.Pow(10, (pH - 8.2)));
+                QP3 = LysNumber / (1 + Math.Pow(10, (pH - 10.54)));
+                QP4 = ArgNumber / (1 + Math.Pow(10, (pH - 12.48)));
+
+                NQ = QN1 + QN2 + QN3 + QN4 + QN5 + QP1 + QP2 + QP3 + QP4;
+
+                if (NQ < 0)              //we are out of range, thus the new pH value must be smaller    
+                {
+                    temp = pH;
+                    pH = pH - ((pH - pHprev) / 2);
+                    pHnext = temp;
+                }
+                else                  //we used to small pH value, so we have to increase it
+                {
+                    temp = pH;
+                    pH = pH + ((pHnext - pH) / 2);
+                    pHprev = temp;
+                }
+
+                if ((pH - pHprev < E) && (pHnext - pH < E)) //terminal condition, finding isoelectric point with given precision
+                    break;
+            }
+            return pH;
+        }
+
         public static double CalculateTolerance(double experimental, MassTolerance tolerance)
         {
             if (tolerance.Units == MassToleranceUnits.Da)

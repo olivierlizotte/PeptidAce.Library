@@ -268,6 +268,100 @@ namespace PeptidAce.Utilities.Methods
             underflow = underError;
         }
 
+        public static void SolveMaxFlowStyle_bkp(List<Dictionary<double, double>> units, Dictionary<double, double> mixed,
+                                 out List<double> solution, out double underflow, IConSol ConSole, double stepSize)
+        {
+            List<double> localFlows = new List<double>();
+            foreach (Dictionary<double, double> unit in units)
+                localFlows.Add(FindLocalMaxima(unit, mixed));
+
+            Dictionary<double, double> virtualMixed = BuildVirtualDic(localFlows, units, mixed.Count);
+
+            double overError = ComputeOver(virtualMixed, mixed);
+            double underError = ComputeUnder(virtualMixed, mixed);
+            double[] bestIndexes = new double[units.Count];
+
+            double iterSize = 1;
+            double bestOverallError = double.MaxValue;
+            List<double> bestLocalFlows = new List<double>();
+            Random rnd = new Random();
+            while (overError >= 1 && iterSize < 10000)//anything less than 1 is an acceptable solution
+            {
+                for (int index = 0; index < bestIndexes.Length; index++)
+                    bestIndexes[index] = -1;
+
+                for (int i = 0; i < units.Count; i++)
+                {
+                    if (localFlows[i] > 0)
+                    {
+                        localFlows[i] -= stepSize * iterSize;
+
+                        virtualMixed = BuildVirtualDic(localFlows, units, mixed.Count);
+                        double tmpErrorOver = ComputeOver(virtualMixed, mixed);
+                        double tmpErrorUnder = ComputeUnder(virtualMixed, mixed);
+
+                        double tmpFlowRate = Math.Abs(overError - tmpErrorOver);
+                        double underDiff = 0;
+                        if (tmpErrorUnder > underError)
+                            underDiff = tmpErrorUnder - underError;
+                        if (underDiff >= 1)
+                            tmpFlowRate /= underDiff;
+                        bestIndexes[i] = tmpFlowRate;
+
+                        localFlows[i] += stepSize * iterSize;
+                    }
+                }
+
+                //Pick pseudo randomly best index
+                double worstFlowRate = 0.0;
+                for (int index = 0; index < bestIndexes.Length; index++)
+                    if (bestIndexes[index] > worstFlowRate)
+                    {
+                        worstFlowRate = bestIndexes[index];
+                    }
+
+                if (worstFlowRate > 0)
+                {
+                    int nbMatching = 0;
+                    for (int index = 0; index < bestIndexes.Length; index++)
+                        if (bestIndexes[index] >= worstFlowRate)
+                            nbMatching++;
+
+                    int iterChoice = rnd.Next(0, nbMatching - 1);
+                    int iterNb = 0;
+                    for (int index = 0; index < bestIndexes.Length; index++)
+                        if (bestIndexes[index] >= worstFlowRate)
+                        {
+                            if (iterChoice == iterNb)
+                            {
+                                localFlows[index] -= stepSize * iterSize;
+                                if (localFlows[index] < 0)
+                                    localFlows[index] = 0.0;
+                            }
+                            iterNb++;
+                        }
+                    iterSize = 1;
+                }
+                else
+                    iterSize++;
+
+                virtualMixed = BuildVirtualDic(localFlows, units, mixed.Count);
+                overError = ComputeOver(virtualMixed, mixed);
+                underError = ComputeUnder(virtualMixed, mixed);
+                if (overError + underError < bestOverallError)
+                {
+                    bestLocalFlows = new List<double>(localFlows);
+                    bestOverallError = overError + underError;
+                }
+            }//End of while overflow > 1
+
+            solution = new List<double>();
+            foreach (double localFlow in localFlows)
+                solution.Add(localFlow);
+
+            underflow = underError;
+        }
+
         private static Dictionary<double, double> BuildVirtualDic(List<double> ratios, List<Dictionary<double, double>> units, int size)
         {
             Dictionary<double, double> virtualMixed = new Dictionary<double, double>(size);

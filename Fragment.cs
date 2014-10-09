@@ -171,7 +171,15 @@ namespace PeptidAce
                 fragments.Add(fg);
         }
 
-        public FullFragments(bool bNyOnly = false, bool includeLosses = false)
+        public string GetFragmentSTR(char separator = ';')
+        {
+            string str = fragments[0].Name;
+            for (int i = 1; i < fragments.Count; i++)
+                str += separator + fragments[i].Name;
+            return str;
+        }
+
+        public FullFragments(bool includeCnZ = false, bool includeAnX = false, bool includeLosses = false)
         {
             if(AllFragments == null)
             {
@@ -204,21 +212,27 @@ namespace PeptidAce
                 fragments.Add(AllFragments["y-A"]);
             }
 
-            if (!bNyOnly)
+            if (includeAnX)
             {
                 fragments.Add(AllFragments["a"]);
-                fragments.Add(AllFragments["c"]);
                 fragments.Add(AllFragments["x"]);
-                fragments.Add(AllFragments["z"]);
                 if(includeLosses)
                 {
                     fragments.Add(AllFragments["a-H2O"]);
-                    fragments.Add(AllFragments["c-H2O"]);
                     fragments.Add(AllFragments["x-H2O"]);
-                    fragments.Add(AllFragments["z-H2O"]);
                     fragments.Add(AllFragments["a-A"]);
-                    fragments.Add(AllFragments["c-A"]);
                     fragments.Add(AllFragments["x-A"]);
+                }
+            }
+            if (includeCnZ)
+            {
+                fragments.Add(AllFragments["c"]);
+                fragments.Add(AllFragments["z"]);
+                if (includeLosses)
+                {
+                    fragments.Add(AllFragments["c-H2O"]);
+                    fragments.Add(AllFragments["z-H2O"]);
+                    fragments.Add(AllFragments["c-A"]);
                     fragments.Add(AllFragments["z-A"]);
                 }
             }
