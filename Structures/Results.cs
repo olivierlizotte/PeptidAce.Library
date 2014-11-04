@@ -33,7 +33,7 @@ namespace PeptidAce
             peptides = new PeptideMatches(new PeptideMatch[0]);
             peptideSequences = new PeptideMatches(new PeptideMatch[0]);
             proteins = new ProteinGroupMatches();
-            dbOptions = new DBOptions("");
+            dbOptions = new DBOptions();
             samples = new Samples();
         }
         /*

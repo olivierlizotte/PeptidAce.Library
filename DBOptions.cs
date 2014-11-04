@@ -23,7 +23,6 @@ namespace PeptidAce
         public int MinimumPrecursorChargeState = 1;
         public int MaximumPrecursorChargeState = 8;
         public int MaximumNumberOfFragmentsPerSpectrum = 100;
-        public string FastaDatabaseFilepath;
         public double MaximumPeptideMass;
         public bool DecoyFusion;
 
@@ -34,6 +33,7 @@ namespace PeptidAce
 
         public int NbPSMToKeep = 8;
         public string OutputFolder;
+        public string TempFolder;
         public double MinimumPSMScore;
         public int MinimumPeptideLength = 5;
         public int MaximumPeptideLength = 100;
@@ -46,7 +46,6 @@ namespace PeptidAce
 
         public bool addFragmentLoss = false;
         public bool addFragmentMods = false;
-        public bool NoEnzymeSearch = false;
         public bool WriteMaxQuantPeakFile = false;
 
         public bool SaveMS1Peaks = true;
@@ -83,21 +82,7 @@ namespace PeptidAce
         public MassTolerance productMassTolerance = new MassTolerance(0.005, MassToleranceUnits.Da);
 
         public IConSol ConSole;
-        /// <summary>
-        /// Parameter less constructor used for save states
-        /// </summary>
         public DBOptions(IConSol console = null)
-        {
-            fixedModifications = new List<Modification>();
-            variableModifications = new List<Modification>();
-            //fragments = new Fragments();
-            if (console == null)
-                ConSole = new ConSolCommandLine();
-            else
-                ConSole = console;
-        }
-
-        public DBOptions(string fasta, IConSol console = null)
         {
             if (console == null)
                 ConSole = new ConSolCommandLine();
@@ -105,11 +90,9 @@ namespace PeptidAce
                 ConSole = console;
             //Create with default values
             this.DecoyFusion = true;
-            this.FastaDatabaseFilepath = fasta;
             this.MaximumPeptideMass = 10000;
             ProteaseDictionary proteases = ProteaseDictionary.Instance;
             this.DigestionEnzyme = proteases["no enzyme"];// proteases["trypsin (no proline rule)"];
-            this.NoEnzymeSearch = true;
             this.ToleratedMissedCleavages = 100;// 3;//determines the length of peptides with no-enzyme option
             this.initiatorMethionineBehavior = InitiatorMethionineBehavior.Variable;
             this.fixedModifications = new List<Modification>();
@@ -126,9 +109,76 @@ namespace PeptidAce
 
             this.PSMFalseDiscoveryRate = 0.25;// 0.05;
 
-            this.OutputFolder = @"C:\_IRIC\DATA\Test2";//C:\Documents and Settings\ProteoAdmin\Desktop\AEffacer\Morpheus\Output";
-            this.MinimumPSMScore = 0.0001;         
+            //this.OutputFolder = @"C:\_IRIC\DATA\Test2";//C:\Documents and Settings\ProteoAdmin\Desktop\AEffacer\Morpheus\Output";
+            this.MinimumPSMScore = 0.0001;
+            this.TempFolder = System.IO.Path.GetTempPath();
         }
+
+        public DBOptions Clone()
+        {
+            DBOptions clone = new DBOptions(ConSole);
+            clone.DBName = DBName;
+            clone.MinimumPrecursorChargeState = MinimumPrecursorChargeState;
+            clone.MaximumPrecursorChargeState = MaximumPrecursorChargeState;
+            clone.MaximumNumberOfFragmentsPerSpectrum = MaximumNumberOfFragmentsPerSpectrum;
+            clone.MaximumPeptideMass = MaximumPeptideMass;
+            clone.DecoyFusion = DecoyFusion;
+            clone.DigestionEnzyme = DigestionEnzyme;
+            clone.ToleratedMissedCleavages = ToleratedMissedCleavages;
+            clone.PSMFalseDiscoveryRate = PSMFalseDiscoveryRate;
+
+            clone.NbPSMToKeep = NbPSMToKeep;
+            clone.OutputFolder = OutputFolder;
+            clone.TempFolder = TempFolder;
+            clone.MinimumPSMScore = MinimumPSMScore;
+            clone.MinimumPeptideLength = MinimumPeptideLength;
+            clone.MaximumPeptideLength = MaximumPeptideLength;
+            
+            clone.fullFragment = fullFragment;
+            clone.everyFragments = everyFragments;
+
+            clone.NbMinProducts = NbMinProducts;
+
+            clone.addFragmentLoss = addFragmentLoss;
+            clone.addFragmentMods = addFragmentMods;
+            clone.WriteMaxQuantPeakFile = WriteMaxQuantPeakFile;
+
+            clone.SaveMS1Peaks = SaveMS1Peaks;
+            clone.SaveMSMSPeaks = SaveMSMSPeaks;
+
+            clone.LoadSpectraIfFound = LoadSpectraIfFound;
+
+            clone.ComputedRetentionTimeDiff = ComputedRetentionTimeDiff;
+            clone.EffectiveIsolationWindowRatio = EffectiveIsolationWindowRatio;
+            clone.MinimumPrecursorIntensityRatioInIsolationWindow = MinimumPrecursorIntensityRatioInIsolationWindow;
+
+
+            clone.dProduct = dProduct;
+            clone.dPrecursor = dPrecursor;
+            clone.dMatchingProductFraction = dMatchingProductFraction;
+            clone.dMatchingProduct = dMatchingProduct;
+            clone.dIntensityFraction = dIntensityFraction;
+            clone.dIntensity = dIntensity;
+            clone.dProtein = dProtein;
+            clone.dPeptideScore = dPeptideScore;
+            clone.dFragmentScore = dFragmentScore;
+
+            clone.dicOfMinPrecursorThr = null;
+            clone.dicOfMaxPrecursorThr = null;
+            clone.dicOfMinFragmentThr = null;
+            clone.dicOfMaxFragmentThr = null;
+
+            clone.initiatorMethionineBehavior = initiatorMethionineBehavior;
+            clone.fixedModifications = new List<Modification>(fixedModifications);
+            clone.variableModifications = new List<Modification>(variableModifications);
+            clone.maximumVariableModificationIsoforms = maximumVariableModificationIsoforms;
+            clone.precursorMassTolerance = precursorMassTolerance;
+            clone.productMassTolerance = productMassTolerance;
+
+
+            return clone;
+        }
+
         /*
         private Dictionary<double, double> dicOfScore = null;
         public void UptimizeParams(bool currentTrendIsGood)
@@ -183,7 +233,6 @@ namespace PeptidAce
             writer.AddLine( "MinimumPrecursorChargeState = " +  MinimumPrecursorChargeState);
             writer.AddLine( "MaximumPrecursorChargeState"+ MaximumPrecursorChargeState);
             writer.AddLine( "MaximumNumberOfFragmentsPerSpectrum"+ MaximumNumberOfFragmentsPerSpectrum);
-            writer.AddLine( "FastaDatabaseFilepath"+ FastaDatabaseFilepath);
             writer.AddLine( "MaximumPeptideMass"+ MaximumPeptideMass);
             writer.AddLine( "DecoyFusion"+ DecoyFusion);
 
@@ -204,7 +253,6 @@ namespace PeptidAce
 
             writer.AddLine( "addFragmentLoss"+ addFragmentLoss);
             writer.AddLine( "addFragmentMods"+ addFragmentMods);
-            writer.AddLine( "NoEnzymeSearch"+ NoEnzymeSearch);
             writer.AddLine( "WriteMaxQuantPeakFile"+ WriteMaxQuantPeakFile);
 
             writer.AddLine( "SaveMS1Peaks"+ SaveMS1Peaks);

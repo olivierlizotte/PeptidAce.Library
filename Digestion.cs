@@ -39,15 +39,15 @@ namespace PeptidAce
             return proteinMasses;
         }
 
-        private bool IsDone = true;
-        private System.Collections.Concurrent.ConcurrentQueue<Tuple<Peptide, int>> CumulMatch;
+        //private bool IsDone = true;
+        //private System.Collections.Concurrent.ConcurrentQueue<Tuple<Peptide, int>> CumulMatch;
         /// <summary>
         /// Runs the protein digestion on the GPU. Does not support modifications for now.
         /// </summary>
         /// <param name="options"></param>
         /// <param name="Proteins"></param>
         /// <param name="listOfQueries"></param>
-        private void RunGPUProteinDigest(DBOptions options, List<Protein> Proteins, Queries listOfQueries)
+        /*private void RunGPUProteinDigest(DBOptions options, List<Protein> Proteins, Queries listOfQueries)
         {
             List<double> precursorMasses = new List<double>(listOfQueries.Count);
             //double[] precursors = new double[listOfQueries.Count];
@@ -72,7 +72,7 @@ namespace PeptidAce
                 nbProteins++;
             }
             pg.Dispose();
-        }
+        }//*/
 
         /// <summary>
         /// Runs the NoEnzyme protein digestion on the GPU
@@ -80,7 +80,7 @@ namespace PeptidAce
         /// <param name="Proteins"></param>
         /// <param name="listOfQueries"></param>
         /// <returns></returns>
-        public IEnumerable<Tuple<Peptide, int>> DigestProteomeOnTheFlyNoEnzyme(List<Protein> Proteins, Queries listOfQueries)
+        /*public IEnumerable<Tuple<Peptide, int>> DigestProteomeOnTheFlyNoEnzyme(List<Protein> Proteins, Queries listOfQueries)
         {
             IsDone = false;
             CumulMatch = new System.Collections.Concurrent.ConcurrentQueue<Tuple<Peptide, int>>();
@@ -102,7 +102,7 @@ namespace PeptidAce
             {
                 yield return item;
             }
-        }
+        }//*/
 
         public IEnumerable<Tuple<Peptide, int>> DigestProteomeOnTheFly(List<Protein> proteins, bool allowSNP, Queries AllQueries)
         {

@@ -177,12 +177,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PeptidAce.Gpu\PeptidAce.GPU.csproj">
-      <Project>{0F49C15B-592E-4371-878B-17E8B3299A9B}</Project>
-      <Name>PeptidAce.GPU</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup />

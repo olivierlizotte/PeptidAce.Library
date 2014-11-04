@@ -13,20 +13,19 @@ using PeptidAce.Utilities.Interfaces;
 namespace PeptidAce.Iso.UnitTest
 {
     public class HistonePositionnalIsomer
-    {
+    {/*
         public static DBOptions GetDBOptions(bool loadFromRaw, bool onlyYions, IConSol console)
         {
             string outputDir = @"C:\_IRIC\DATA\Test\testNB\Iso3\";
             string fastaFile = @"C:\_IRIC\Data\NB\peptide.fasta";
-            DBOptions dbOptions = new DBOptions(fastaFile, console);
-            dbOptions.precursorMassTolerance = new MassTolerance(8/*8*//*8withoutisotopes*/, MassToleranceUnits.ppm);
-            dbOptions.productMassTolerance = new MassTolerance(20/*8*//*8withoutisotopes*/, MassToleranceUnits.ppm);
-            //dbOptions.productMassTolerance = new MassTolerance(0.05/*0.034*//*without isotopes*/, MassToleranceUnits.Da);//0.034 is a 60 000 resolution over 2000 range in mz
+            DBOptions dbOptions = new DBOptions(console);
+            dbOptions.precursorMassTolerance = new MassTolerance(8, MassToleranceUnits.ppm);
+            dbOptions.productMassTolerance = new MassTolerance(20, MassToleranceUnits.ppm);
+            //dbOptions.productMassTolerance = new MassTolerance(0.05, MassToleranceUnits.Da);//0.034 is a 60 000 resolution over 2000 range in mz
             dbOptions.MaximumPeptideMass = 200000;
             dbOptions.OutputFolder = outputDir;
             ProteaseDictionary proteases = ProteaseDictionary.Instance;
             dbOptions.DigestionEnzyme = proteases["no enzyme"];//trypsin (no proline rule)"];
-            dbOptions.NoEnzymeSearch = false;// true;
             dbOptions.DecoyFusion = false;
             dbOptions.MaximumNumberOfFragmentsPerSpectrum = 400;
             //dbOptions.protease = proteases["trypsin (no proline rule)"];
@@ -69,7 +68,7 @@ namespace PeptidAce.Iso.UnitTest
                         bestPsm = psm;
             AnnotatedSpectrum aSpec = new AnnotatedSpectrum(ProjectRatios[0], bestPsm.Query.spectrum, bestPsm.Peptide );
             return aSpec;
-        }
+        }*/
         /*
         public static AnnotatedSpectrum TestNeo4j(IConSol console)
         {

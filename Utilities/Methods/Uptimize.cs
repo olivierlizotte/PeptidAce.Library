@@ -10,13 +10,13 @@ namespace PeptidAce.Utilities.Methods
         DBOptions dbOptions;
         Samples samples;
         Ace ace;
-        public UptimizeOptions(DBOptions options, Samples pSamples)
+        public UptimizeOptions(DBOptions options, string fasta, Samples pSamples)
         {
             dbOptions = options;
             samples = pSamples;
 
             ace = new Ace(dbOptions, samples);
-            ace.Preload(false, false);
+            ace.Preload(fasta, false, false);
             ace.PrepareQueries();
         }
 

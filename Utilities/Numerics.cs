@@ -98,6 +98,78 @@ namespace PeptidAce.Utilities
             }
         }
 
+        public static double AvgVolSideChain(char aa)
+        {
+            switch (aa)
+            {
+                case 'A': return 92;
+                case 'C': return 106;
+                case 'D': return 125;
+                case 'E': return 155;
+                case 'F': return 203;
+                case 'G': return 66;
+                case 'H': return 167;
+                case 'I': return 169;
+                case 'K': return 171;
+                case 'L': return 168;
+                case 'M': return 171;
+                case 'N': return 135;
+                case 'P': return 129;
+                case 'Q': return 161;
+                case 'R': return 225;
+                case 'S': return 99;
+                case 'T': return 122;
+                case 'V': return 142;
+                case 'W': return 240;
+                case 'Y': return 203;
+                default: return 0.0;
+            }
+        }
+
+        public static double CalculateVSideChain(string sequence)
+        {
+            double phil = 0;
+            foreach (char c in sequence)
+                phil += AvgVolSideChain(c);
+            return phil;
+        }
+
+        public static double Hydrophilicity(char aa)
+        {
+            switch(aa)
+            {
+                case 'A': return -0.5;
+                case 'C': return -1.0;
+                case 'D': return 3.0;
+                case 'E': return 3.0;
+                case 'F': return -2.5;
+                case 'G': return 0.0;
+                case 'H': return -0.5;
+                case 'I': return -1.8;
+                case 'K': return 3.0;
+                case 'L': return -1.8;
+                case 'M': return -1.3;
+                case 'N': return 0.2;
+                case 'P': return 0.0;
+                case 'Q': return 0.2;
+                case 'R': return 3.0;
+                case 'S': return 0.3;
+                case 'T': return -0.4;
+                case 'V': return -1.5;
+                case 'W': return -3.4;
+                case 'Y': return -2.3;
+                default: return 0.0;
+            }
+        }
+
+        public static double CalculateHydrophilicity(string sequence)
+        {
+            double phil = 0;
+            foreach (char c in sequence)
+                phil += Hydrophilicity(c);
+            return phil;
+        }
+
         public static double CalculateHydrophobicity(string sequence)
         {
             int nbHydro = 0;

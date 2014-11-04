@@ -19,10 +19,10 @@ namespace PeptidAce
     /// </summary>
     public class Ace
     {
-        public static Result Start(DBOptions dbOptions, Samples project, bool loadMS1 = true, bool filterMS2 = true, Queries queries = null)
+        public static Result Start(DBOptions dbOptions, string fasta, Samples project, bool loadMS1 = true, bool filterMS2 = true, Queries queries = null)
         {
             Ace pAce = new Ace(dbOptions, project);
-            pAce.Preload(loadMS1, filterMS2);
+            pAce.Preload(fasta, loadMS1, filterMS2);
             if (queries == null)
                 pAce.PrepareQueries();
             else
@@ -52,9 +52,9 @@ namespace PeptidAce
         /// Also creates the list of queries (some spectrum are used more than once, when multiple 
         /// precursors are found in the mass range of the fragmentation window
         /// </summary>
-        public void Preload(bool loadMS1, bool filterMS2 = true)
+        public void Preload(string fasta, bool loadMS1, bool filterMS2 = true)
         {
-            AllProteins             = ReadProteomeFromFasta(dbOptions.FastaDatabaseFilepath, !dbOptions.DecoyFusion);
+            AllProteins             = ReadProteomeFromFasta(fasta, !dbOptions.DecoyFusion);
             AllSpectras             = LoadSpectras(loadMS1, filterMS2);
         }
 
@@ -73,9 +73,9 @@ namespace PeptidAce
         /// Can be used to load a save state
         /// </summary>
         /// <param name="tmp"></param>
-        public void Load(Result tmp)
+        public void Load(Result tmp, string fasta)
         {
-            AllProteins = ReadProteomeFromFasta(dbOptions.FastaDatabaseFilepath, !dbOptions.DecoyFusion);
+            AllProteins = ReadProteomeFromFasta(fasta, !dbOptions.DecoyFusion);
             AllQueries = tmp.queries;
             
             AllSpectras = new Dictionary<Sample, Spectra>();
@@ -202,10 +202,8 @@ namespace PeptidAce
             ProPheus dbSearcher = new ProPheus(dbOptions);
             Digestion ps = new Digestion(dbOptions);
 
-            if (dbOptions.NoEnzymeSearch)
-                result.SetPrecursors(dbSearcher.Search(queries, ps.DigestProteomeOnTheFlyNoEnzyme(AllProteins, queries)));
-            else
-                result.SetPrecursors(dbSearcher.Search(queries, ps.DigestProteomeOnTheFly(AllProteins, false, queries)));
+            result.SetPrecursors(dbSearcher.Search(queries, ps.DigestProteomeOnTheFly(AllProteins, false, queries)));
+
             dbOptions.ConSole.WriteLine(result.precursors.Count + " precursors matched !");
             
             foreach (Precursor precursor in result.precursors)
