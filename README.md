@@ -7,4 +7,3 @@ PeptidAce is an open source C# library that includes a lot of tools for peptide 
 
 [Proteomic Platform Staff](http://proteomics.iric.ca/?lang=en#/Equipe)
 
-[Official Website](http://proteomics.iric.ca/tools/Iso-PeptidAce/index.html)
