@@ -179,29 +179,49 @@ namespace PeptidAce
             return str;
         }
 
-        public FullFragments(bool includeCnZ = false, bool includeAnX = false, bool includeLosses = false)
+        private void InitFullFrags()
         {
-            if(AllFragments == null)
+            AllFragments = new Dictionary<string, FragmentGen>();
+
+            AllFragments.Add("b", new FragmentGen("b", false, 0));
+            AllFragments.Add("y", new FragmentGen("y", true, Constants.WATER_MONOISOTOPIC_MASS));
+
+            AllFragments.Add("a", new FragmentGen("a", false, -29.002741 + Constants.PROTON_MASS));
+            AllFragments.Add("c", new FragmentGen("c", false, 17.02654915));
+            AllFragments.Add("x", new FragmentGen("x", true, 43.9898346942));
+            AllFragments.Add("z", new FragmentGen("z", true, 1.991840552567 - Constants.HYDROGEN_MASS));
+
+            foreach (string fg in AllFragments.Keys.ToArray())
             {
-                AllFragments = new Dictionary<string, FragmentGen>();
+                //Water Loss
+                AllFragments.Add(fg + "-H2O", new FragmentGen(fg + "-H2O", AllFragments[fg].IsReverse, AllFragments[fg].addOn - Constants.WATER_MONOISOTOPIC_MASS));
+                //Amonia Loss
+                AllFragments.Add(fg + "-A", new FragmentGen(fg + "-A", AllFragments[fg].IsReverse, AllFragments[fg].addOn - Constants.AMONIA_MASS));
+            }
+        }
+        public FullFragments(List<FragmentGen> frags)
+        {
+            if (AllFragments == null)
+                InitFullFrags();
+            fragments = frags;
+        }
 
-                AllFragments.Add("b", new FragmentGen("B", false, 0));
-                AllFragments.Add("y", new FragmentGen("Y", true, Constants.WATER_MONOISOTOPIC_MASS));
-                
-                AllFragments.Add("a", new FragmentGen("A", false, -29.002741 + Constants.PROTON_MASS));
-                AllFragments.Add("c", new FragmentGen("C", false, 17.02654915));
-                AllFragments.Add("x", new FragmentGen("X", true, 43.9898346942));
-                AllFragments.Add("z", new FragmentGen("Z", true, 1.991840552567 - Constants.HYDROGEN_MASS));                
+        public FullFragments(char[] ions, bool includeLosses, bool includeInternalFragments)//bool includeCnZ = false, bool includeAnX = false, bool includeLosses = false)
+        {
+            if (AllFragments == null)
+                InitFullFrags();
 
-                foreach (string fg in AllFragments.Keys.ToArray())
+            fragments = new List<FragmentGen>();
+            foreach(char ion in ions)
+            {
+                fragments.Add(AllFragments[ion.ToString()]);
+                if(includeLosses)
                 {
-                    //Water Loss
-                    AllFragments.Add(fg + "-H2O", new FragmentGen(AllFragments[fg].Name + "h2oLoss", AllFragments[fg].IsReverse, AllFragments[fg].addOn - Constants.WATER_MONOISOTOPIC_MASS));
-                    //Amonia Loss
-                    AllFragments.Add(fg + "-A", new FragmentGen(AllFragments[fg].Name + "amoniaLoss", AllFragments[fg].IsReverse, AllFragments[fg].addOn - Constants.AMONIA_MASS));                    
+                    fragments.Add(AllFragments[ion.ToString() + "-H2O"]);                    
+                    fragments.Add(AllFragments[ion.ToString() + "-A"]);
                 }
             }
-            fragments = new List<FragmentGen>();
+            /*
             fragments.Add(AllFragments["b"]);
             fragments.Add(AllFragments["y"]);
             if(includeLosses)
@@ -235,7 +255,7 @@ namespace PeptidAce
                     fragments.Add(AllFragments["c-A"]);
                     fragments.Add(AllFragments["z-A"]);
                 }
-            }
+            }//*/
         }
 
         /// <summary>

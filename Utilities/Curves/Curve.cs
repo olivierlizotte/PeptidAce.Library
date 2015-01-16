@@ -10,6 +10,7 @@ namespace PeptidAce.Utilities
     public class ElutionCurve
     {
         public double Area = 0.0;
+        public double PeakTop = 0.0;
         public double[] Coefficients = null;        
 
         public List<double> time = null;
@@ -116,6 +117,9 @@ namespace PeptidAce.Utilities
                 Array.Sort(arrayTime, arrayIntensity);
                 time = new List<double>(arrayTime);
                 intensityCount = new List<double>(arrayIntensity);
+                foreach (double val in intensityCount)
+                    if (val > PeakTop)
+                        PeakTop = val;
 
                 double area1 = Utilities.CurveFitter.FitToPolynomial(time.ToArray(), intensityCount.ToArray(), out Coefficients);
                 double area2 = Utilities.CurveFitter.AreaUnderTheCurve(time, intensityCount);
@@ -181,8 +185,14 @@ namespace PeptidAce.Utilities
                             Area = areaSmooth;
                         else
                             Console.WriteLine("Contradiction");
+
+                        PeakTop = 0;
+                        foreach (double val in interpolatedIntensityCount)
+                            if (val > PeakTop)
+                                PeakTop = val;
                     }
                     //Area = interpole.Integrate(interpolatedTime[interpolatedTime.Length - 1]);
+                    
                 }
                 catch (Exception ex)
                 {

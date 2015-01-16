@@ -145,6 +145,7 @@
     <Compile Include="Utilities\Methods\GradientDescent.cs" />
     <Compile Include="Utilities\Methods\Uptimize.cs" />
     <Compile Include="Utilities\Numerics.cs" />
+    <Compile Include="Utilities\Tools\MotifFindor.cs" />
     <Compile Include="Utilities\Tools\vsCSV.cs" />
     <Compile Include="Utilities\Tools\vsCSVWriter.cs" />
   </ItemGroup>
